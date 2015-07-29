@@ -1,0 +1,21 @@
+scenario: POST/DELETE wire
+
+#variables
+authorization_headers = [contentType: application/json, Authorization: Token 3939203932093basdsdfa9304jo]
+
+#steps
+- given POST to /wires with $authorization_headers
+- when request body: {"value": 1}
+- then response with code: 201 and body: {@"id": "1", "value": 1}
+
+- given GET from /wires/12 with $authorization_headers
+- then response with code: 200 and body: {@"id": "1", "value": 1}
+
+- given DELETE from /wires/12 with $authorization_headers
+- then response with code: 204
+
+- given GET from /wires/12 with $authorization_headers
+- then response with code: 404
+
+
+

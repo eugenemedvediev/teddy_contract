@@ -1,0 +1,29 @@
+[
+  {
+    "method": "GET",
+    "path": "/fake",
+    "scenarios": [
+      {
+        "name": "ok",
+        "contentType": "application/json",
+        "body": {"message": "fake server successful response"},
+        "code": 200,
+        "headers": {}
+      },
+      {
+        "name": "validation",
+        "contentType": "application/json",
+        "body": {"error": "example of validation error on fake server"},
+        "code": 400,
+        "headers": {}
+      },
+      {
+        "name": "server_error",
+        "contentType": "application/json",
+        "body": {"error": "example of server error on fake server"},
+        "code": 503,
+        "headers": {}
+      }
+    ]
+  }
+]

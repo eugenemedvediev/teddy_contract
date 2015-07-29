@@ -1,0 +1,49 @@
+{
+  "description": "Create wire",
+  "type": "scenario",
+  "api": [
+    {
+      "method": "GET",
+      "path": "/wires/1",
+      "request": null,
+      "response": {
+        "contentType": "applicatoin/json",
+        "body": {
+          "error": "not found"
+        },
+        "statusCode": 404
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/wires",
+      "request": {
+        "contentType": "application/json",
+        "body": {
+          "title": "simple Title"
+        }
+      },
+      "response": {
+        "contentType": "applicatoin/json",
+        "body": {
+          "id": 1,
+          "title": "simple Title"
+        },
+        "statusCode": 201
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/wires/1",
+      "request": null,
+      "response": {
+        "contentType": "applicatoin/json",
+        "body": {
+          "id": 1,
+          "title": "simple Title"
+        },
+        "statusCode": 201
+      }
+    }
+  ]
+}
