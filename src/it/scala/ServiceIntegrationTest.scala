@@ -3,7 +3,9 @@
  */
 
 import com.isightpartners.qa.teddy.Service
+import com.isightpartners.qa.teddy.creator.DummyCreator
 import com.isightpartners.qa.teddy.db.DB
+import com.isightpartners.qa.teddy.engine.StubEngine
 import com.isightpartners.qa.teddy.model.{Configuration, Server}
 import org.json4s.JsonAST.JValue
 import org.json4s.JsonDSL._
@@ -17,7 +19,7 @@ import org.scalatest.FunSuite
  */
 class ServiceIntegrationTest extends FunSuite with Payload {
 
-  val service: Service = new Service(new DB {
+  private val engine: StubEngine = new StubEngine(DummyCreator, new DB {
     def writeConfiguration(name: String, configuration: Configuration) = {}
 
     def getAllStartedConfigurations: List[(String, Configuration)] = List[(String, Configuration)]()
@@ -29,16 +31,18 @@ class ServiceIntegrationTest extends FunSuite with Payload {
     def readConfiguration(name: String): Configuration = new Configuration()
   })
 
+  val service: Service = new Service(engine)
+
   test("create server") {
     // given
 
     // when
-    val json: JValue = service.createServer()
+    val json: JValue = engine.create()
 
     // then
     implicit lazy val formats = org.json4s.DefaultFormats
     val server: Server = json.extract[Server]
-    assert(service.serverNames.contains(server.name) === true)
+    assert(engine.serverNames.contains(server.name) === true)
     assert(server.started === false)
     assert(server.description === null)
     assert(server.api === Array.empty)
@@ -46,23 +50,23 @@ class ServiceIntegrationTest extends FunSuite with Payload {
 
   test("delete server") {
     // given
-    val createJson: JValue = service.createServer()
+    val createJson: JValue = engine.create()
     implicit lazy val formats = org.json4s.DefaultFormats
     val createServer: Server = createJson.extract[Server]
-    var status: List[Server] = service.getStatus.extract[Array[Server]].toList
+    var status: List[Server] = engine.statusAll.extract[Array[Server]].toList
     assert(status.count(s => s.name.equals(createServer.name)) === 1)
 
     // when
-    service.deleteServer(createServer.name)
+    engine.delete(createServer.name)
 
     // then
-    status = service.getStatus.extract[Array[Server]].toList
+    status = engine.statusAll.extract[Array[Server]].toList
     assert(status.count(s => s.name.equals(createServer.name)) === 0)
   }
 
   test("start server") {
     // given
-    val createJson: JValue = service.createServer()
+    val createJson: JValue = engine.create()
     implicit lazy val formats = org.json4s.DefaultFormats
     val createServer: Server = createJson.extract[Server]
 
@@ -73,7 +77,7 @@ class ServiceIntegrationTest extends FunSuite with Payload {
 
     // then
     val server: Server = json.extract[Server]
-    assert(service.serverNames.contains(server.name) === true)
+    assert(engine.serverNames.contains(server.name) === true)
     assert(createServer.name === server.name)
     assert(server.started === true)
     assert(server.description === "working server")
@@ -82,7 +86,7 @@ class ServiceIntegrationTest extends FunSuite with Payload {
 
   test("stop server") {
     // given
-    val createJson: JValue = service.createServer()
+    val createJson: JValue = engine.create()
     implicit lazy val formats = org.json4s.DefaultFormats
     val createServer: Server = createJson.extract[Server]
     service.executeCommand(createServer.name,
@@ -96,7 +100,7 @@ class ServiceIntegrationTest extends FunSuite with Payload {
 
     // then
     val server: Server = json.extract[Server]
-    assert(service.serverNames.contains(server.name) === true)
+    assert(engine.serverNames.contains(server.name) === true)
     assert(createServer.name === server.name)
     assert(server.started === false)
     assert(server.description === null)
@@ -105,36 +109,36 @@ class ServiceIntegrationTest extends FunSuite with Payload {
 
   test("load server") {
     // given
-    val createJson: JValue = service.createServer()
+    val createJson: JValue = engine.create()
     implicit lazy val formats = org.json4s.DefaultFormats
     val createServer: Server = createJson.extract[Server]
 
     // when
     service.executeCommand(createServer.name,
       ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(CONFIGURATION))
+        ("configuration" -> parse(DUMMY_CONFIGURATION))
     )
 
     // then
-    val server: Server = service.getStatus(createServer.name).extract[Server]
-    assert(service.serverNames.contains(server.name) === true)
+    val server: Server = engine.status(createServer.name).extract[Server]
+    assert(engine.serverNames.contains(server.name) === true)
     assert(createServer.name === server.name)
     assert(server.started === true)
     assert(server.api !== Array.empty)
     assert(server.api.length === 2)
-    val configuration: Configuration = parse(CONFIGURATION).extract[Configuration]
+    val configuration: Configuration = parse(DUMMY_CONFIGURATION).extract[Configuration]
     assert(server.description === configuration.description)
     assert(server.api === configuration.api)
   }
 
   test("clean server") {
     // given
-    val createJson: JValue = service.createServer()
+    val createJson: JValue = engine.create()
     implicit lazy val formats = org.json4s.DefaultFormats
     val createServer: Server = createJson.extract[Server]
     service.executeCommand(createServer.name,
       ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(CONFIGURATION))
+        ("configuration" -> parse(DUMMY_CONFIGURATION))
     )
 
     // when
@@ -144,12 +148,12 @@ class ServiceIntegrationTest extends FunSuite with Payload {
 
     // then
     val server: Server = json.extract[Server]
-    assert(service.serverNames.contains(server.name) === true)
+    assert(engine.serverNames.contains(server.name) === true)
     assert(createServer.name === server.name)
     assert(server.started === true)
     assert(server.api !== Array.empty)
     assert(server.api.length === 1)
-    val configuration: Configuration = parse(CONFIGURATION).extract[Configuration]
+    val configuration: Configuration = parse(DUMMY_CONFIGURATION).extract[Configuration]
     assert(server.description !== configuration.description)
     assert(server.api !== configuration.api)
   }

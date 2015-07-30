@@ -9,9 +9,9 @@
  */
 trait Payload {
 
-  val CONFIGURATION =
+  val DUMMY_CONFIGURATION =
     """{
-      |  "description": "Stub Test Configuration",
+      |  "description": "Dummy Test Configuration",
       |  "api": [
       |    {
       |      "method": "POST",

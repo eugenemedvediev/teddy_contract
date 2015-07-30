@@ -4,9 +4,11 @@
 
 import java.nio.file.{Path => FilePath}
 
+import com.isightpartners.qa.teddy.creator.DummyCreator
 import com.isightpartners.qa.teddy.db.DB
+import com.isightpartners.qa.teddy.engine.StubEngine
 import com.isightpartners.qa.teddy.model.{Configuration, Path, Scenario, Server}
-import com.isightpartners.qa.teddy.{Constants, HttpQuery, Service}
+import com.isightpartners.qa.teddy.{HttpQuery, Service}
 import org.json4s.JsonAST.JValue
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
@@ -21,11 +23,12 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   case class WorkingServerConfigurationResponse(name: String, description: String, api: List[Path])
 
-  val httpQuery = new HttpQuery
-  val service: Service = new Service(new DB {
+  val httpQuery = new HttpQuery{}
+  private val creator: DummyCreator.type = DummyCreator
+  private val engine: StubEngine = new StubEngine(creator, new DB {
     def writeConfiguration(name: String, configuration: Configuration) = {}
 
-    def getAllStartedConfigurations: List[(String, Configuration)] =  List[(String, Configuration)]()
+    def getAllStartedConfigurations: List[(String, Configuration)] = List[(String, Configuration)]()
 
     def deleteConfiguration(name: String) = {}
 
@@ -34,9 +37,11 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
     def readConfiguration(name: String): Configuration = new Configuration()
   })
 
+  val service: Service = new Service(engine)
+
   test("default configuration ok scenario") {
     // given
-    val createJson: JValue = service.createServer()
+    val createJson: JValue = engine.create()
     implicit lazy val formats = org.json4s.DefaultFormats
     val createServer: Server = createJson.extract[Server]
     val startJson: JValue = service.executeCommand(createServer.name,
@@ -56,7 +61,7 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   test("default configuration validation scenario") {
     // given
-    val createJson: JValue = service.createServer()
+    val createJson: JValue = engine.create()
     implicit lazy val formats = org.json4s.DefaultFormats
     val createServer: Server = createJson.extract[Server]
     val startJson: JValue = service.executeCommand(createServer.name,
@@ -76,7 +81,7 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   test("default configuration server_error scenario") {
     // given
-    val createJson: JValue = service.createServer()
+    val createJson: JValue = engine.create()
     implicit lazy val formats = org.json4s.DefaultFormats
     val createServer: Server = createJson.extract[Server]
     val startJson: JValue = service.executeCommand(createServer.name,
@@ -96,7 +101,7 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   test("default configuration not existing scenario") {
     // given
-    val createJson: JValue = service.createServer()
+    val createJson: JValue = engine.create()
     implicit lazy val formats = org.json4s.DefaultFormats
     val createServer: Server = createJson.extract[Server]
     val startJson: JValue = service.executeCommand(createServer.name,
@@ -116,7 +121,7 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   test("configuration page") {
     // given
-    val createJson: JValue = service.createServer()
+    val createJson: JValue = engine.create()
     implicit lazy val formats = org.json4s.DefaultFormats
     val createServer: Server = createJson.extract[Server]
     val startJson: JValue = service.executeCommand(createServer.name,
@@ -126,13 +131,13 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
     val url: String = s"http://localhost:${startServer.port}"
 
     // when
-    val (code: Int, json: JValue) = httpQuery.get(s"$url${Constants.STUB_CONFIGURATION}")
+    val (code: Int, json: JValue) = httpQuery.get(s"$url${creator.STUB_CONFIGURATION}")
 
     // then
     assert(code === 200)
 
     val server: WorkingServerConfigurationResponse = json.extract[WorkingServerConfigurationResponse]
-    assert(service.serverNames.contains(server.name) === true)
+    assert(engine.serverNames.contains(server.name) === true)
     assert(server.description === "working server")
     assert(server.api.size === 1)
 

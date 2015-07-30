@@ -17,7 +17,7 @@ import org.json4s.jackson.JsonMethods._
  * @author Ievgen Medvediev (imedvediev@isightpartners.com)
  * @since 3/31/15
  */
-class HttpQuery {
+trait HttpQuery {
 
   val jsonProperties = Map(
     "Accept" -> "application/json",

@@ -7,27 +7,27 @@
         >
 
     <servlet>
-        <servlet-name>stub</servlet-name>
-        <servlet-class>com.isightpartners.qa.teddy.TeddyServlet</servlet-class>
+        <servlet-name>dummy</servlet-name>
+        <servlet-class>com.isightpartners.qa.teddy.servlet.DummyServlet</servlet-class>
     </servlet>
 
     <servlet>
-        <servlet-name>stub</servlet-name>
-        <servlet-class>com.isightpartners.qa.teddy.ScenarioServlet</servlet-class>
+        <servlet-name>scenario</servlet-name>
+        <servlet-class>com.isightpartners.qa.teddy.servlet.ScenarioServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>howto</servlet-name>
-        <servlet-class>com.isightpartners.qa.teddy.HowtoServlet</servlet-class>
+        <servlet-class>com.isightpartners.qa.teddy.servlet.HowtoServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>stub</servlet-name>
-        <url-pattern>/servers/*</url-pattern>
+        <servlet-name>dummy</servlet-name>
+        <url-pattern>/dummies/*</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>stub</servlet-name>
+        <servlet-name>scenario</servlet-name>
         <url-pattern>/scenarios/*</url-pattern>
     </servlet-mapping>
 

@@ -25,7 +25,7 @@ object StubLoader extends App {
 
   case class Server(host: String, port: Int, root: String)
 
-  val httpQuery = new HttpQuery
+  val httpQuery = new HttpQuery{}
 
   val jsonProperties = Map(
     "Accept" -> "application/json",

@@ -1,25 +1,18 @@
-/**
- * iSIGHT Partners, Inc. Proprietary
- */
-
-package com.isightpartners.qa.teddy
-
-/**
- *
- * @author Ievgen Medvediev (imedvediev@isightpartners.com)
- * @since 4/3/15
- */
+package com.isightpartners.qa.teddy.servlet
 
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
-import org.json4s._
+import com.isightpartners.qa.teddy.Service
 import org.json4s.JsonDSL._
+import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
-class TeddyServlet extends HttpServlet {
+/**
+ * Created by ievgen on 30/07/15.
+ */
+trait StubServlet extends HttpServlet {
 
-  private val service = new Service
-
+  val service: Service
 
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
     response.setContentType("application/json")
@@ -30,10 +23,10 @@ class TeddyServlet extends HttpServlet {
       if (path != null && path.startsWith("/") && !path.equals("/")) {
         response.setStatus(HttpServletResponse.SC_OK)
         val name: String = path.drop(1)
-        service.getStatus(name)
+        service.status(name)
       } else {
         response.setStatus(HttpServletResponse.SC_OK)
-        service.getStatus
+        service.statusAll()
       }
     response.getWriter.write(compact(responseBody))
   }
@@ -67,7 +60,7 @@ class TeddyServlet extends HttpServlet {
         "error" -> s"not supported path '%s'".format(path)
       } else {
         response.setStatus(HttpServletResponse.SC_OK)
-        service.createServer()
+        service.create()
       }
     response.getWriter.write(compact(responseBody))
   }
@@ -81,7 +74,7 @@ class TeddyServlet extends HttpServlet {
       if (path != null && path.startsWith("/")) {
         response.setStatus(HttpServletResponse.SC_NO_CONTENT)
         val name: String = path.drop(1)
-        service.deleteServer(name)
+        service.delete(name)
         JObject()
       } else {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST)

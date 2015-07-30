@@ -2,7 +2,9 @@ import java.io.File
 import java.nio.file.Files
 
 import com.isightpartners.qa.teddy.Service
+import com.isightpartners.qa.teddy.creator.DummyCreator
 import com.isightpartners.qa.teddy.db.ESDB
+import com.isightpartners.qa.teddy.engine.StubEngine
 import com.isightpartners.qa.teddy.model.{Configuration, Server}
 import org.apache.commons.io.FileUtils
 import org.json4s.JsonAST.JValue
@@ -23,11 +25,13 @@ class RecoveryIntegrationTest extends FunSuite with Payload with BeforeAndAfterA
 
   var service: Service = _
   var elasticData: File = _
+  var engine: StubEngine = _
 
   override protected def beforeAll() = {
     super.beforeAll()
     elasticData = Files.createTempDirectory("elasticsearch_data_recovery_test").toFile
-    service = new Service(new ESDB(elastic_home = elasticData.getAbsolutePath))
+    engine = new StubEngine(DummyCreator, new ESDB(elastic_home = elasticData.getAbsolutePath))
+    service = new Service(engine)
   }
 
   override protected def afterAll() = {
@@ -42,37 +46,37 @@ class RecoveryIntegrationTest extends FunSuite with Payload with BeforeAndAfterA
 
   test("recover started") {
     // given
-    val createJson: JValue = service.createServer()
+    val createJson: JValue = service.create()
     implicit lazy val formats = org.json4s.DefaultFormats
     val createServer: Server = createJson.extract[Server]
     var json: JValue = service.executeCommand(createServer.name,
       ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(CONFIGURATION))
+        ("configuration" -> parse(DUMMY_CONFIGURATION))
     )
     var server: Server = json.extract[Server]
-    assert(service.serverNames.contains(server.name) === true)
+    assert(engine.serverNames.contains(server.name) === true)
     assert(createServer.name === server.name)
     assert(server.started === true)
     assert(server.api !== Array.empty)
     assert(server.api.length === 2)
-    var configuration: Configuration = parse(CONFIGURATION).extract[Configuration]
+    var configuration: Configuration = parse(DUMMY_CONFIGURATION).extract[Configuration]
     assert(server.description === configuration.description)
     assert(server.api === configuration.api)
 
     // when
     Thread.sleep(5000)
-    service = new Service(new ESDB(elastic_home = elasticData.getAbsolutePath))
-    json = service.getStatus
+    service = new Service(new StubEngine(DummyCreator, new ESDB(elastic_home = elasticData.getAbsolutePath)))
+    json = engine.statusAll
 
     // then
     val servers = json.extract[List[Server]]
     server = servers.find(p => p.name == server.name).get
-    assert(service.serverNames.contains(server.name) === true)
+    assert(engine.serverNames.contains(server.name) === true)
     assert(createServer.name === server.name)
     assert(server.started === true)
     assert(server.api !== Array.empty)
     assert(server.api.length === 2)
-    configuration = parse(CONFIGURATION).extract[Configuration]
+    configuration = parse(DUMMY_CONFIGURATION).extract[Configuration]
     assert(server.description === configuration.description)
     assert(server.api === configuration.api)
   }

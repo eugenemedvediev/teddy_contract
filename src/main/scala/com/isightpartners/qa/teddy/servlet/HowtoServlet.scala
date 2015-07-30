@@ -2,7 +2,7 @@
  * iSIGHT Partners, Inc. Proprietary
  */
 
-package com.isightpartners.qa.teddy
+package com.isightpartners.qa.teddy.servlet
 
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
@@ -22,45 +22,45 @@ class HowtoServlet extends HttpServlet {
       """
         |[
         |{
-        | "url":"/servers",
+        | "url":"/{dummies|scenarios}",
         | "method": "GET",
-        | "description":"show info about all working servers"
+        | "description":"show info about all working {dummies|scenarios}"
         |},
         |{
-        | "url":"/servers",
+        | "url":"/{dummies|scenarios}",
         | "method": "POST",
         | "description":"create new working server"
         |},
         |{
-        | "url":"/servers/{server_name}",
+        | "url":"/{dummies|scenarios}/{server_name}",
         | "method": "DELETE",
         | "description":"delete working server"
         |},
         |{
-        | "url":"/servers/{server_name}",
+        | "url":"/{dummies|scenarios}/{server_name}",
         | "method": "GET",
         | "description":"show info about working server"
         |},
         |{
-        | "url":"/servers/{server_name}",
+        | "url":"/{dummies|scenarios}/{server_name}",
         | "method": "PUT",
         | "description":"start working server",
         | "payload": {"command":"start"}
         |},
         |{
-        | "url":"/servers/{server_name}",
+        | "url":"/{dummies|scenarios}/{server_name}",
         | "method": "PUT",
         | "description":"stop working server",
         | "payload": {"command":"stop"}
         |},
         |{
-        | "url":"/servers/{server_name}",
+        | "url":"/{dummies|scenarios}/{server_name}",
         | "method": "PUT",
         | "description":"restore default configuration",
         | "payload": {"command":"clean"}
         |},
         |{
-        | "url":"/servers/{server_name}",
+        | "url":"/{dummies|scenarios}/{server_name}",
         | "method": "PUT",
         | "description":"load specified configuration",
         | "payload": {
