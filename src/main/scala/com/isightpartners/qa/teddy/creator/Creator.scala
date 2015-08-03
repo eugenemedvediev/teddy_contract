@@ -14,7 +14,7 @@ import org.json4s.jackson.JsonMethods._
  */
 trait Creator {
 
-  def generateServerRouteList(x: JValue): List[ServerRoute]
+  def generateServerRoute(x: JValue): ServerRoute
 
   val defaultAPISettingsKey: String
 
@@ -75,7 +75,7 @@ trait Creator {
   def createServerRoutes(list: List[JsonAST.JValue]) = {
     def loop(list: List[JsonAST.JValue], acc: List[ServerRoute]): List[ServerRoute] = list match {
       case Nil => acc
-      case x :: xs => generateServerRouteList(x) ::: loop(xs, acc)
+      case x :: xs => generateServerRoute(x) :: loop(xs, acc)
     }
     loop(list, List())
   }

@@ -116,7 +116,7 @@ class ServiceIntegrationTest extends FunSuite with Payload {
     // when
     service.executeCommand(createServer.name,
       ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(DUMMY_CONFIGURATION))
+        ("configuration" -> parse(NEW_DUMMY_CONFIGURATION))
     )
 
     // then
@@ -126,7 +126,7 @@ class ServiceIntegrationTest extends FunSuite with Payload {
     assert(server.started === true)
     assert(server.api !== Array.empty)
     assert(server.api.length === 2)
-    val configuration: Configuration = parse(DUMMY_CONFIGURATION).extract[Configuration]
+    val configuration: Configuration = parse(NEW_DUMMY_CONFIGURATION).extract[Configuration]
     assert(server.description === configuration.description)
     assert(server.api === configuration.api)
   }
@@ -138,7 +138,7 @@ class ServiceIntegrationTest extends FunSuite with Payload {
     val createServer: Server = createJson.extract[Server]
     service.executeCommand(createServer.name,
       ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(DUMMY_CONFIGURATION))
+        ("configuration" -> parse(NEW_DUMMY_CONFIGURATION))
     )
 
     // when
@@ -153,7 +153,7 @@ class ServiceIntegrationTest extends FunSuite with Payload {
     assert(server.started === true)
     assert(server.api !== Array.empty)
     assert(server.api.length === 1)
-    val configuration: Configuration = parse(DUMMY_CONFIGURATION).extract[Configuration]
+    val configuration: Configuration = parse(NEW_DUMMY_CONFIGURATION).extract[Configuration]
     assert(server.description !== configuration.description)
     assert(server.api !== configuration.api)
   }

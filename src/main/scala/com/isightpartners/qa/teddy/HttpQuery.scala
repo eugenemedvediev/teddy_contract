@@ -7,7 +7,9 @@ package com.isightpartners.qa.teddy
 import java.io.InputStream
 
 import com.isightpartners.qa.teddy.model.{Path, Server}
-import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet, HttpRequestBase}
+import org.apache.http.HttpEntity
+import org.apache.http.client.methods.{HttpPost, CloseableHttpResponse, HttpGet, HttpRequestBase}
+import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
@@ -29,6 +31,20 @@ trait HttpQuery {
     setProperties(get, jsonProperties)
     try {
       val response = HttpClients.createDefault().execute(get)
+      val statusCode: Int = response.getStatusLine.getStatusCode
+      val content: JValue = getContent(response)
+      (statusCode, content)
+    } catch {
+      case _: Throwable => (0, JObject())
+    }
+  }
+
+  def post(url: String, headers: Map[String, String], body: JValue): (Int, JValue) = {
+    val post = new HttpPost(url)
+    setProperties(post, headers)
+    post.setEntity(new StringEntity(compact(body)))
+    try {
+      val response = HttpClients.createDefault().execute(post)
       val statusCode: Int = response.getStatusLine.getStatusCode
       val content: JValue = getContent(response)
       (statusCode, content)
