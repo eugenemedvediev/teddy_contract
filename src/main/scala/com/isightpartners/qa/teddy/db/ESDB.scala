@@ -26,8 +26,10 @@ import scala.concurrent.{Await, Future}
  * @author Ievgen Medvediev (imedvediev@isightpartners.com)
  * @since 4/10/15
  */
-class ESDB(val elastic_home: String) extends DB {
+class ESDB(val elastic_home: String, val indexName: String) extends DB {
 
+  private val mapping: String = "configurations"
+  private val indexMapping: String = s"$indexName/$mapping"
   val settings = ImmutableSettings.settingsBuilder()
     .put("protocol", "http")
     .put("path.home", elastic_home).build()
@@ -38,7 +40,7 @@ class ESDB(val elastic_home: String) extends DB {
   def writeConfiguration(name: String, configuration: Configuration) = {
     implicit val formats = DefaultFormats
     client.execute {
-      index into "stub/configurations" id name fields(
+      index into indexMapping id name fields(
         "description" -> configuration.description,
         "api" -> Serialization.write(configuration.api),
         "started" -> true
@@ -48,7 +50,7 @@ class ESDB(val elastic_home: String) extends DB {
 
   def setStarted(name: String, started: Boolean) = {
     client.execute {
-      index into "stub/configurations" id name fields (
+      index into indexMapping id name fields (
         "started" -> started
         )
     }
@@ -58,7 +60,7 @@ class ESDB(val elastic_home: String) extends DB {
     //TODO: not used anymore
     implicit val formats = DefaultFormats
     val execute: Future[GetResponse] = client.execute {
-      get id name from "stub/configurations"
+      get id name from indexMapping
     }
     val source: util.Map[String, AnyRef] = Await.result(execute, 120 seconds).getSource
     val description: String = source.get("description").toString
@@ -68,17 +70,17 @@ class ESDB(val elastic_home: String) extends DB {
 
   def deleteConfiguration(name: String) = {
     client.execute {
-      delete id name from "stub/configurations"
+      delete id name from indexMapping
     }
   }
 
   def getAllStartedConfigurations: List[(String, Configuration)] = {
     try {
-      val existsFeature: Future[IndicesExistsResponse] = client.exists("stub")
+      val existsFeature: Future[IndicesExistsResponse] = client.exists(indexName)
       val result: IndicesExistsResponse = Await.result(existsFeature, 5 second)
       if (result.isExists) {
         val execute: Future[SearchResponse] = client.execute {
-          search in "stub" -> "configurations" query {
+          search in indexName -> mapping query {
             term("started", true)
           } sort (by field "_id")
         }
@@ -88,8 +90,8 @@ class ESDB(val elastic_home: String) extends DB {
         searchResult.getHits.getHits.toList.map(p => (p.getId, new Configuration(p.getSource.get("description").toString, parse(p.getSource.get("api").toString).extract[List[Path]])))
       } else {
         client.execute {
-          create index "stub" shards 5 mappings (
-            "configurations" as(
+          create index indexName shards 5 mappings (
+            mapping as(
               "description" typed StringType,
               "api" typed StringType
               )

@@ -17,7 +17,7 @@ import scala.collection.mutable
 /**
  * Created by ievgen on 29/07/15.
  */
-class StubService(creator: Creator, db: DB = new ESDB(elastic_home = ConfigFactory.load.getString("elastic.home"))) extends Service with HttpQuery with ServerNames {
+class StubService(creator: Creator, db: DB) extends Service with HttpQuery with ServerNames {
 
   override val servers: mutable.Map[String, StubServer] = prepareServers()
 

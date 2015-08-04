@@ -27,7 +27,7 @@ class RecoveryIntegrationTest extends FunSuite with Payload with BeforeAndAfterA
   override protected def beforeAll() = {
     super.beforeAll()
     elasticData = Files.createTempDirectory("elasticsearch_data_recovery_test").toFile
-    service = new StubService(DummyCreator, new ESDB(elastic_home = elasticData.getAbsolutePath))
+    service = new StubService(DummyCreator, new ESDB(elastic_home = elasticData.getAbsolutePath, "test"))
   }
 
   override protected def afterAll() = {
@@ -55,7 +55,7 @@ class RecoveryIntegrationTest extends FunSuite with Payload with BeforeAndAfterA
 
     // when
     Thread.sleep(5000)
-    service = new StubService(DummyCreator, new ESDB(elastic_home = elasticData.getAbsolutePath))
+    service = new StubService(DummyCreator, new ESDB(elastic_home = elasticData.getAbsolutePath, "test"))
     json = service.statusAll
 
     // then

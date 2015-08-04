@@ -34,7 +34,7 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
   override protected def beforeEach() = {
     //    super.beforeAll()
     elasticData = Files.createTempDirectory("elasticsearch_data_recovery_test").toFile
-    service = new StubService(DummyCreator, new ESDB(elastic_home = elasticData.getAbsolutePath))
+    service = new StubService(DummyCreator, new ESDB(elastic_home = elasticData.getAbsolutePath, "test"))
   }
 
   override protected def afterEach() = {

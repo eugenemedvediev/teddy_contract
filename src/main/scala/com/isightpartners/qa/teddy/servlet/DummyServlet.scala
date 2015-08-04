@@ -1,15 +1,7 @@
-/**
- * iSIGHT Partners, Inc. Proprietary
- */
-
 package com.isightpartners.qa.teddy.servlet
 
-/**
- *
- * @author Ievgen Medvediev (imedvediev@isightpartners.com)
- * @since 4/3/15
- */
-
 import com.isightpartners.qa.teddy.creator.DummyCreator
+import com.isightpartners.qa.teddy.db.ESDB
+import com.typesafe.config.ConfigFactory
 
-class DummyServlet extends StubServlet(DummyCreator)
+class DummyServlet extends StubServlet(creator = DummyCreator,  db = new ESDB(elastic_home = ConfigFactory.load.getString("elastic.home"), "dummy"))

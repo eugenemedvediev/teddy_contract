@@ -3,18 +3,16 @@ package com.isightpartners.qa.teddy.servlet
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import com.isightpartners.qa.teddy.creator.{Creator, DummyCreator}
+import com.isightpartners.qa.teddy.db.DB
 import com.isightpartners.qa.teddy.service.{StubService, Service}
 import com.isightpartners.qa.teddy.model.Configuration
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
-/**
- * Created by ievgen on 30/07/15.
- */
-class StubServlet(creator: Creator) extends HttpServlet {
+class StubServlet(creator: Creator, db: DB) extends HttpServlet {
 
-  val service: Service = new StubService(creator)
+  val service: Service = new StubService(creator, db)
 
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
     response.setContentType("application/json")
