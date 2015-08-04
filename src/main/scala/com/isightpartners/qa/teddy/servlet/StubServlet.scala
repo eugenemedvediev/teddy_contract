@@ -2,7 +2,9 @@ package com.isightpartners.qa.teddy.servlet
 
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
-import com.isightpartners.qa.teddy.Service
+import com.isightpartners.qa.teddy.creator.{Creator, DummyCreator}
+import com.isightpartners.qa.teddy.service.{StubService, Service}
+import com.isightpartners.qa.teddy.model.Configuration
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
@@ -10,9 +12,9 @@ import org.json4s.jackson.JsonMethods._
 /**
  * Created by ievgen on 30/07/15.
  */
-trait StubServlet extends HttpServlet {
+class StubServlet(creator: Creator) extends HttpServlet {
 
-  val service: Service
+  val service: Service = new StubService(creator)
 
   override def doGet(request: HttpServletRequest, response: HttpServletResponse) {
     response.setContentType("application/json")
@@ -41,7 +43,9 @@ trait StubServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_OK)
         val name: String = path.drop(1)
         val json: JValue = parse(request.getInputStream)
-        service.executeCommand(name, json)
+        implicit val formats = DefaultFormats
+        val configuration = json.extract[Configuration]
+        service.update(name, configuration)
       } else {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
         "error" -> "server name hasn't been provided"
@@ -60,7 +64,10 @@ trait StubServlet extends HttpServlet {
         "error" -> s"not supported path '%s'".format(path)
       } else {
         response.setStatus(HttpServletResponse.SC_OK)
-        service.create()
+        val json: JValue = parse(request.getInputStream)
+        implicit val formats = DefaultFormats
+        val configuration = json.extract[Configuration]
+        service.create(configuration)
       }
     response.getWriter.write(compact(responseBody))
   }

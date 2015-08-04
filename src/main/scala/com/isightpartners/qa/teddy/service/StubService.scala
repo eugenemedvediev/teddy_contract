@@ -1,4 +1,4 @@
-package com.isightpartners.qa.teddy.engine
+package com.isightpartners.qa.teddy.service
 
 import com.isightpartners.qa.teddy._
 import com.isightpartners.qa.teddy.creator.Creator
@@ -17,59 +17,38 @@ import scala.collection.mutable
 /**
  * Created by ievgen on 29/07/15.
  */
-class StubEngine(creator: Creator, db: DB = new ESDB(elastic_home = ConfigFactory.load.getString("elastic.home"))) extends Engine with HttpQuery with ServerNames {
+class StubService(creator: Creator, db: DB = new ESDB(elastic_home = ConfigFactory.load.getString("elastic.home"))) extends Service with HttpQuery with ServerNames {
 
   override val servers: mutable.Map[String, StubServer] = prepareServers()
 
-  override def create(): JValue = {
+  def create(configuration: Configuration): JValue = {
     val freeNames: List[String] = serverNames.filter(!servers.keySet.contains(_))
     if (freeNames.nonEmpty) {
       val name = freeNames.head
-      val workingServer = creator.createDefaultServer(name)
-      servers.put(name, workingServer)
+      load(name, configuration)
+      db.writeConfiguration(name, configuration)
       status(name)
     } else "message" -> "reached limit of servers"
 
   }
 
-  override def delete(name: String): Unit = {
-    servers.get(name).get.stop
-    servers.remove(name)
-  }
-
-  override def start(name: String): JValue = {
-    servers.get(name).get.start
-    db.setStarted(name, started = true)
-    status(name)
-  }
-
-  override def stop(name: String): JValue = {
-    servers.get(name).get.stop
-    db.setStarted(name, started = false)
-    status(name)
-  }
-
-  override def load(name: String, configuration: Configuration): JValue = {
-    var workingServer: StubServer = servers.get(name).get
-    val api: List[Path] = configuration.api
-    implicit lazy val formats = org.json4s.DefaultFormats
-    val loadedAPI: JValue = parse(Serialization.write(api))
+  def update(name: String, configuration: Configuration): JValue = {
+    val workingServer: StubServer = servers.get(name).get
     workingServer.stop
-    workingServer = creator.createWorkingServer(name, configuration.description, loadedAPI)
-    workingServer.start
-    servers.put(name, workingServer)
+    load(name, configuration)
     db.writeConfiguration(name, configuration)
     status(name)
   }
 
-  override def clean(name: String): JValue = {
-    var workingServer: StubServer = servers.get(name).get
-    workingServer.stop
-    workingServer = creator.createDefaultServer(name)
+  def delete(name: String): Unit = {
+    servers.get(name).get.stop
+    servers.remove(name)
+  }
+
+  def load(name: String, configuration: Configuration): Option[StubServer] = {
+    val workingServer = creator.createWorkingServer(name, configuration.description, configuration.api)
     workingServer.start
     servers.put(name, workingServer)
-    db.deleteConfiguration(name)
-    status(name)
   }
 
   def status(name: String): JValue = {
@@ -97,12 +76,12 @@ class StubEngine(creator: Creator, db: DB = new ESDB(elastic_home = ConfigFactor
   def loadConfigurations(configurations: List[(String, Configuration)]): mutable.Map[String, StubServer] = {
     implicit lazy val formats = org.json4s.DefaultFormats
     configurations.foldLeft(mutable.Map[String, StubServer]())((map, elem) => {
-      map.put(elem._1, creator.createWorkingServer(elem._1, elem._2.description, Extraction.decompose(elem._2.api)))
+      map.put(elem._1, creator.createWorkingServer(elem._1, elem._2.description, elem._2.api))
       map
     })
   }
 
   def loadDefaultConfiguration: mutable.Map[String, StubServer] = {
-    mutable.Map(serverNames.head -> creator.createDefaultServer(serverNames.head))
+    mutable.Map[String, StubServer]()
   }
 }

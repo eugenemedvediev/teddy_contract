@@ -1,6 +1,5 @@
-package com.isightpartners.qa.teddy.engine
+package com.isightpartners.qa.teddy.service
 
-import com.isightpartners.qa.teddy.db.DB
 import com.isightpartners.qa.teddy.model.Configuration
 import fr.simply.StubServer
 import org.json4s.JsonAST.JValue
@@ -10,15 +9,12 @@ import scala.collection.mutable
 /**
  * Created by ievgen on 29/07/15.
  */
-trait Engine {
+trait Service {
   val servers: mutable.Map[String, StubServer]
 
-  def create(): JValue
+  def create(configuration: Configuration): JValue
+  def update(name: String, configuration: Configuration): JValue
   def delete(name: String): Unit
-  def start(name: String): JValue
-  def stop(name: String): JValue
-  def load(name: String, configuration: Configuration): JValue
-  def clean(name: String): JValue
   def status(name: String): JValue
   def statusAll(): JValue
 }

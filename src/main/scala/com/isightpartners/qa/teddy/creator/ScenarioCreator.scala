@@ -1,5 +1,6 @@
 package com.isightpartners.qa.teddy.creator
 
+import com.isightpartners.qa.teddy.model.Path
 import fr.simply.{ServerRoute, StubServer}
 import org.json4s.JValue
 
@@ -7,6 +8,5 @@ import org.json4s.JValue
  * Created by ievgen on 30/07/15.
  */
 object ScenarioCreator extends Creator {
-  override val defaultAPISettingsKey: String = "working.server.api"
-  override def generateServerRoute(x: JValue): ServerRoute = throw new NotImplementedError()
+  override def createServerRoutes(list: List[Path]): List[ServerRoute] = throw new NotImplementedError()
 }

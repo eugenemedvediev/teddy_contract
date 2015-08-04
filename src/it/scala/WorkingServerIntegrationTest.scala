@@ -5,11 +5,11 @@
 import java.io.File
 import java.nio.file.{Files, Path => FilePath}
 
+import com.isightpartners.qa.teddy.HttpQuery
 import com.isightpartners.qa.teddy.creator.DummyCreator
 import com.isightpartners.qa.teddy.db.ESDB
-import com.isightpartners.qa.teddy.engine.StubEngine
-import com.isightpartners.qa.teddy.model.{Path, Server}
-import com.isightpartners.qa.teddy.{HttpQuery, Service}
+import com.isightpartners.qa.teddy.service.StubService
+import com.isightpartners.qa.teddy.model.{Configuration, Path, Server}
 import org.apache.commons.io.FileUtils
 import org.json4s.JsonAST.JValue
 import org.json4s.JsonDSL._
@@ -26,17 +26,15 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
   case class WorkingServerConfigurationResponse(name: String, description: String, api: List[Path])
 
   val httpQuery = new HttpQuery {}
-  var service: Service = _
   var elasticData: File = _
-  var engine: StubEngine = _
+  var service: StubService = _
   var server: Server = _
   var port: Int = _
 
   override protected def beforeEach() = {
     //    super.beforeAll()
     elasticData = Files.createTempDirectory("elasticsearch_data_recovery_test").toFile
-    engine = new StubEngine(DummyCreator, new ESDB(elastic_home = elasticData.getAbsolutePath))
-    service = new Service(engine)
+    service = new StubService(DummyCreator, new ESDB(elastic_home = elasticData.getAbsolutePath))
   }
 
   override protected def afterEach() = {
@@ -50,14 +48,8 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   test("loaded configuration ok scenario 1") {
     // given
-    val createJson: JValue = service.create()
     implicit lazy val formats = org.json4s.DefaultFormats
-    server = createJson.extract[Server]
-
-    var jsonLoad: JValue = service.executeCommand(server.name,
-      ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(DUMMY_FULL_CONFIGURATION))
-    )
+    val jsonLoad: JValue = service.create(parse(DUMMY_FULL_CONFIGURATION).extract[Configuration])
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
@@ -93,14 +85,8 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   test("load configuration ok scenario 2") {
     // given
-    val createJson: JValue = service.create()
     implicit lazy val formats = org.json4s.DefaultFormats
-    server = createJson.extract[Server]
-
-    var jsonLoad: JValue = service.executeCommand(server.name,
-      ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(DUMMY_FULL_CONFIGURATION))
-    )
+    val jsonLoad: JValue = service.create(parse(DUMMY_FULL_CONFIGURATION).extract[Configuration])
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
@@ -131,14 +117,8 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   test("load configuration not found header") {
     // given
-    val createJson: JValue = service.create()
     implicit lazy val formats = org.json4s.DefaultFormats
-    server = createJson.extract[Server]
-
-    var jsonLoad: JValue = service.executeCommand(server.name,
-      ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(DUMMY_FULL_CONFIGURATION))
-    )
+    val jsonLoad: JValue = service.create(parse(DUMMY_FULL_CONFIGURATION).extract[Configuration])
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
@@ -167,14 +147,8 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   test("load configuration not found empty header") {
     // given
-    val createJson: JValue = service.create()
     implicit lazy val formats = org.json4s.DefaultFormats
-    server = createJson.extract[Server]
-
-    var jsonLoad: JValue = service.executeCommand(server.name,
-      ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(DUMMY_FULL_CONFIGURATION))
-    )
+    val jsonLoad: JValue = service.create(parse(DUMMY_FULL_CONFIGURATION).extract[Configuration])
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
@@ -201,14 +175,8 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   test("load configuration not found body") {
     // given
-    val createJson: JValue = service.create()
     implicit lazy val formats = org.json4s.DefaultFormats
-    server = createJson.extract[Server]
-
-    var jsonLoad: JValue = service.executeCommand(server.name,
-      ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(DUMMY_FULL_CONFIGURATION))
-    )
+    val jsonLoad: JValue = service.create(parse(DUMMY_FULL_CONFIGURATION).extract[Configuration])
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
@@ -239,14 +207,8 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   test("load configuration not found path") {
     // given
-    val createJson: JValue = service.create()
     implicit lazy val formats = org.json4s.DefaultFormats
-    server = createJson.extract[Server]
-
-    var jsonLoad: JValue = service.executeCommand(server.name,
-      ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(DUMMY_FULL_CONFIGURATION))
-    )
+    val jsonLoad: JValue = service.create(parse(DUMMY_FULL_CONFIGURATION).extract[Configuration])
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
@@ -263,14 +225,8 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   test("configuration page") {
     // given
-    val createJson: JValue = service.create()
     implicit lazy val formats = org.json4s.DefaultFormats
-    server = createJson.extract[Server]
-
-    var jsonLoad: JValue = service.executeCommand(server.name,
-      ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(DUMMY_FULL_CONFIGURATION))
-    )
+    val jsonLoad: JValue = service.create(parse(DUMMY_FULL_CONFIGURATION).extract[Configuration])
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
@@ -283,7 +239,7 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
     assert(code === 200)
 
     val server1: WorkingServerConfigurationResponse = json.extract[WorkingServerConfigurationResponse]
-    assert(engine.serverNames.contains(server1.name) === true)
+    assert(service.serverNames.contains(server1.name) === true)
     assert(server1.description === "Dummy Test Configuration")
     assert(server1.api.size === 2)
 
@@ -314,14 +270,8 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   test("loaded configuration no header") {
     // given
-    val createJson: JValue = service.create()
     implicit lazy val formats = org.json4s.DefaultFormats
-    server = createJson.extract[Server]
-
-    var jsonLoad: JValue = service.executeCommand(server.name,
-      ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(DUMMY_NO_HEADER_CONFIGURATION))
-    )
+    val jsonLoad: JValue = service.create(parse(DUMMY_NO_HEADER_CONFIGURATION).extract[Configuration])
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
@@ -353,14 +303,8 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   test("loaded configuration no body") {
     // given
-    val createJson: JValue = service.create()
     implicit lazy val formats = org.json4s.DefaultFormats
-    server = createJson.extract[Server]
-
-    var jsonLoad: JValue = service.executeCommand(server.name,
-      ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(DUMMY_NO_BODY_CONFIGURATION))
-    )
+    val jsonLoad: JValue = service.create(parse(DUMMY_NO_BODY_CONFIGURATION).extract[Configuration])
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"

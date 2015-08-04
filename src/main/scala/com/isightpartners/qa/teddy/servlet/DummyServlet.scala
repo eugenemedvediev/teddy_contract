@@ -10,10 +10,6 @@ package com.isightpartners.qa.teddy.servlet
  * @since 4/3/15
  */
 
-import com.isightpartners.qa.teddy.Service
 import com.isightpartners.qa.teddy.creator.DummyCreator
-import com.isightpartners.qa.teddy.engine.StubEngine
 
-class DummyServlet extends StubServlet {
-  val service = new Service(new StubEngine(DummyCreator))
-}
+class DummyServlet extends StubServlet(DummyCreator)

@@ -2,13 +2,11 @@
  * iSIGHT Partners, Inc. Proprietary
  */
 
-import com.isightpartners.qa.teddy.Service
 import com.isightpartners.qa.teddy.creator.DummyCreator
 import com.isightpartners.qa.teddy.db.DB
-import com.isightpartners.qa.teddy.engine.StubEngine
+import com.isightpartners.qa.teddy.service.StubService
 import com.isightpartners.qa.teddy.model.{Configuration, Server}
 import org.json4s.JsonAST.JValue
-import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
 import org.scalatest.FunSuite
 
@@ -19,7 +17,7 @@ import org.scalatest.FunSuite
  */
 class ServiceIntegrationTest extends FunSuite with Payload {
 
-  private val engine: StubEngine = new StubEngine(DummyCreator, new DB {
+  private val service: StubService = new StubService(DummyCreator, new DB {
     def writeConfiguration(name: String, configuration: Configuration) = {}
 
     def getAllStartedConfigurations: List[(String, Configuration)] = List[(String, Configuration)]()
@@ -31,131 +29,61 @@ class ServiceIntegrationTest extends FunSuite with Payload {
     def readConfiguration(name: String): Configuration = new Configuration()
   })
 
-  val service: Service = new Service(engine)
 
   test("create server") {
     // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val configuration: Configuration = parse(NEW_DUMMY_CONFIGURATION).extract[Configuration]
 
     // when
-    val json: JValue = engine.create()
+    val json: JValue = service.create(configuration)
 
     // then
-    implicit lazy val formats = org.json4s.DefaultFormats
     val server: Server = json.extract[Server]
-    assert(engine.serverNames.contains(server.name) === true)
-    assert(server.started === false)
-    assert(server.description === null)
-    assert(server.api === Array.empty)
+    assert(service.serverNames.contains(server.name) === true)
+    assert(server.started === true)
+    assert(server.description === "Wires Submission + Search")
+    assert(server.api !== Array.empty)
   }
 
   test("delete server") {
     // given
-    val createJson: JValue = engine.create()
     implicit lazy val formats = org.json4s.DefaultFormats
+    val configuration: Configuration = parse(NEW_DUMMY_CONFIGURATION).extract[Configuration]
+    val createJson: JValue = service.create(configuration)
     val createServer: Server = createJson.extract[Server]
-    var status: List[Server] = engine.statusAll.extract[Array[Server]].toList
+    var status: List[Server] = service.statusAll.extract[Array[Server]].toList
     assert(status.count(s => s.name.equals(createServer.name)) === 1)
 
     // when
-    engine.delete(createServer.name)
+    service.delete(createServer.name)
 
     // then
-    status = engine.statusAll.extract[Array[Server]].toList
+    status = service.statusAll.extract[Array[Server]].toList
     assert(status.count(s => s.name.equals(createServer.name)) === 0)
-  }
-
-  test("start server") {
-    // given
-    val createJson: JValue = engine.create()
-    implicit lazy val formats = org.json4s.DefaultFormats
-    val createServer: Server = createJson.extract[Server]
-
-    // when
-    val json: JValue = service.executeCommand(createServer.name,
-      "command" -> service.Command.START.toString
-    )
-
-    // then
-    val server: Server = json.extract[Server]
-    assert(engine.serverNames.contains(server.name) === true)
-    assert(createServer.name === server.name)
-    assert(server.started === true)
-    assert(server.description === "working server")
-    assert(server.api !== Array.empty)
-  }
-
-  test("stop server") {
-    // given
-    val createJson: JValue = engine.create()
-    implicit lazy val formats = org.json4s.DefaultFormats
-    val createServer: Server = createJson.extract[Server]
-    service.executeCommand(createServer.name,
-      "command" -> service.Command.START.toString
-    )
-
-    // when
-    val json: JValue = service.executeCommand(createServer.name,
-      "command" -> service.Command.STOP.toString
-    )
-
-    // then
-    val server: Server = json.extract[Server]
-    assert(engine.serverNames.contains(server.name) === true)
-    assert(createServer.name === server.name)
-    assert(server.started === false)
-    assert(server.description === null)
-    assert(server.api === Array.empty)
   }
 
   test("load server") {
     // given
-    val createJson: JValue = engine.create()
     implicit lazy val formats = org.json4s.DefaultFormats
+    val configuration: Configuration = parse(NEW_DUMMY_CONFIGURATION).extract[Configuration]
+    val createJson: JValue = service.create(configuration)
     val createServer: Server = createJson.extract[Server]
 
     // when
-    service.executeCommand(createServer.name,
-      ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(NEW_DUMMY_CONFIGURATION))
-    )
+    val configurationUpdate: Configuration = parse(DUMMY_FULL_CONFIGURATION).extract[Configuration]
+    service.update(createServer.name, configurationUpdate)
 
     // then
-    val server: Server = engine.status(createServer.name).extract[Server]
-    assert(engine.serverNames.contains(server.name) === true)
+    val server: Server = service.status(createServer.name).extract[Server]
+    assert(service.serverNames.contains(server.name) === true)
     assert(createServer.name === server.name)
     assert(server.started === true)
     assert(server.api !== Array.empty)
     assert(server.api.length === 2)
-    val configuration: Configuration = parse(NEW_DUMMY_CONFIGURATION).extract[Configuration]
-    assert(server.description === configuration.description)
-    assert(server.api === configuration.api)
-  }
 
-  test("clean server") {
-    // given
-    val createJson: JValue = engine.create()
-    implicit lazy val formats = org.json4s.DefaultFormats
-    val createServer: Server = createJson.extract[Server]
-    service.executeCommand(createServer.name,
-      ("command" -> service.Command.LOAD.toString) ~
-        ("configuration" -> parse(NEW_DUMMY_CONFIGURATION))
-    )
-
-    // when
-    val json: JValue = service.executeCommand(createServer.name,
-      "command" -> service.Command.CLEAN.toString
-    )
-
-    // then
-    val server: Server = json.extract[Server]
-    assert(engine.serverNames.contains(server.name) === true)
-    assert(createServer.name === server.name)
-    assert(server.started === true)
-    assert(server.api !== Array.empty)
-    assert(server.api.length === 1)
-    val configuration: Configuration = parse(NEW_DUMMY_CONFIGURATION).extract[Configuration]
-    assert(server.description !== configuration.description)
-    assert(server.api !== configuration.api)
+    assert(server.description === configurationUpdate.description)
+    assert(server.api === configurationUpdate.api)
   }
 
 }

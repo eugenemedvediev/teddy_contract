@@ -2,25 +2,29 @@ package com.isightpartners.qa.teddy.creator
 
 import com.github.kxbmap.configs._
 import com.isightpartners.qa.teddy.creator.DummyCreator._
+import com.isightpartners.qa.teddy.model.{Scenario, Path}
 import com.typesafe.config.ConfigFactory
 import fr.simply._
+import fr.simply.util.ContentType
 import org.json4s
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import org.json4s.jackson.Serialization
+import org.simpleframework.http.Request
 
 /**
  * Created by ievgen on 30/07/15.
  */
 trait Creator {
 
-  def generateServerRoute(x: JValue): ServerRoute
-
-  val defaultAPISettingsKey: String
+  def createServerRoutes(list: List[Path]): List[ServerRoute]
 
   val STUB_CONFIGURATION = "/stub/configuration"
 
   val DEFAULT_WORKING_SERVER_DESCRIPTION = "working server"
+
+  val APPLICATION_JSON: ContentType = fr.simply.util.ContentType("application/json")
 
   def aPost = POST(_, _, _)
 
@@ -44,20 +48,13 @@ trait Creator {
     "OPTIONS" -> aOptions
   )
 
-  def loadDefaultWorkingAPI: json4s.JValue = {
-    val apiFile: String = ConfigFactory.load().get[String](defaultAPISettingsKey)
-    jsonFromFile(apiFile)
-  }
-
   def jsonFromFile(name: String): JValue = {
     parse(scala.io.Source.fromInputStream(getClass.getClassLoader.getResource(name).openStream()).getLines().mkString)
   }
 
-  def createWorkingServer(name: String, description: String, api: JValue) = new StubServer(8090, (createStubConfigurationServerRoute(name, description, api) :: createServerRoutes(api.children)).toArray: _*).defaultResponse(APPLICATION_JSON, """{"contract_error":"not supported path or method by contract; check configuration GET %s"}""".format(STUB_CONFIGURATION), 404)
+  def createWorkingServer(name: String, description: String, api: List[Path]) = new StubServer(8090, (createStubConfigurationServerRoute(name, description, api) :: createServerRoutes(api)).toArray: _*).defaultResponse(APPLICATION_JSON, """{"contract_error":"not supported path or method by contract; check configuration GET %s"}""".format(STUB_CONFIGURATION), 404)
 
-  def createDefaultServer(name: String) = createWorkingServer(name, DEFAULT_WORKING_SERVER_DESCRIPTION, loadDefaultWorkingAPI)
-
-  def createStubConfigurationServerRoute(name: String, description: String, api: JValue): ServerRoute = {
+  def createStubConfigurationServerRoute(name: String, description: String, api: List[Path]): ServerRoute = {
     GET(
       path = STUB_CONFIGURATION,
       response = DynamicServerResponse({ request =>
@@ -65,19 +62,11 @@ trait Creator {
         val server: String = compact(
           ("name" -> name) ~
             ("description" -> description) ~
-            ("api" -> Extraction.decompose(api))
+            ("api" -> parse(Serialization.write(api)))
         )
         StaticServerResponse(fr.simply.util.ContentType("application/json"), server, 200)
       })
     )
-  }
-
-  def createServerRoutes(list: List[JsonAST.JValue]) = {
-    def loop(list: List[JsonAST.JValue], acc: List[ServerRoute]): List[ServerRoute] = list match {
-      case Nil => acc
-      case x :: xs => generateServerRoute(x) :: loop(xs, acc)
-    }
-    loop(list, List())
   }
 
   def getMethod(method: String) = map.getOrElse(method, throw new IllegalArgumentException(s"Unsupported method: $method"))
@@ -97,12 +86,24 @@ trait Creator {
     }
   }
 
-  def parseHeaders(x: JsonAST.JValue): Map[String, String] = {
-    implicit lazy val formats = org.json4s.DefaultFormats
-    val body: JValue = x \ "headers"
-    body match {
-      case _: JObject => body.extract[Map[String, String]]
-      case _ => Map[String, String]()
+  def getHeaders(request: Request): Map[String, String] = {
+    val tuples: List[(String, String)] = for {
+      name <- request.getNames.toArray.toList
+    } yield (name.toString, request.getValue(name.toString))
+    tuples.toMap
+  }
+
+  def getScenariosWithHeaders(scenarios: List[Scenario], headers: Map[String, String]): List[Scenario] = {
+    if (headers.isEmpty) {
+      scenarios.filter(scenario =>
+        scenario.request.headers.isEmpty
+      )
+    } else {
+      scenarios.filter(scenario =>
+        scenario.request.headers.forall(sh =>
+          headers.contains(sh._1) && headers.getOrElse(sh._1, null) == sh._2
+        )
+      )
     }
   }
 
