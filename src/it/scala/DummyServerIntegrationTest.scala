@@ -3,14 +3,11 @@
  */
 
 import java.io.File
-import java.nio.file.{Files, Path => FilePath}
 
 import com.isightpartners.qa.teddy.HttpQuery
 import com.isightpartners.qa.teddy.creator.DummyCreator
-import com.isightpartners.qa.teddy.db.ESDB
-import com.isightpartners.qa.teddy.service.StubService
 import com.isightpartners.qa.teddy.model.{Configuration, Path, Server}
-import org.apache.commons.io.FileUtils
+import com.isightpartners.qa.teddy.service.StubService
 import org.json4s.JsonAST.JValue
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
@@ -32,18 +29,11 @@ class DummyServerIntegrationTest extends FunSuite with DummyPayload with BeforeA
   var port: Int = _
 
   override protected def beforeEach() = {
-    //    super.beforeAll()
-    elasticData = Files.createTempDirectory("elasticsearch_data_recovery_test").toFile
-    service = new StubService(DummyCreator, new ESDB(elastic_home = elasticData.getAbsolutePath, "test"))
+    service = new StubService(DummyCreator, new TestDB)
   }
 
   override protected def afterEach() = {
-    try {
-      FileUtils.forceDelete(elasticData)
-    } catch {
-      case e: Exception => println("exception during deleting: " + elasticData)
-    }
-
+    service.clean()
   }
 
   test("loaded configuration ok path 1 scenario 1") {
@@ -53,7 +43,7 @@ class DummyServerIntegrationTest extends FunSuite with DummyPayload with BeforeA
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
-    Thread.sleep(5000)
+    //    Thread.sleep(5000)
 
     // when
     val (code: Int, json: JValue) = httpQuery.post(
@@ -93,7 +83,7 @@ class DummyServerIntegrationTest extends FunSuite with DummyPayload with BeforeA
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
-    Thread.sleep(5000)
+    //    Thread.sleep(5000)
 
     // when
     val (code: Int, json: JValue) = httpQuery.post(
@@ -125,7 +115,7 @@ class DummyServerIntegrationTest extends FunSuite with DummyPayload with BeforeA
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
-    Thread.sleep(5000)
+    //    Thread.sleep(5000)
 
     // when
     val (code: Int, json: JValue) = httpQuery.post(
@@ -155,7 +145,7 @@ class DummyServerIntegrationTest extends FunSuite with DummyPayload with BeforeA
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
-    Thread.sleep(5000)
+    //    Thread.sleep(5000)
 
     // when
     val (code: Int, json: JValue) = httpQuery.post(
@@ -183,7 +173,7 @@ class DummyServerIntegrationTest extends FunSuite with DummyPayload with BeforeA
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
-    Thread.sleep(5000)
+    //    Thread.sleep(5000)
 
     // when
     val (code: Int, json: JValue) = httpQuery.post(
@@ -215,7 +205,7 @@ class DummyServerIntegrationTest extends FunSuite with DummyPayload with BeforeA
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
-    Thread.sleep(5000)
+    //    Thread.sleep(5000)
 
     // when
     val (code: Int, json: JValue) = httpQuery.get(s"$url/fake_929dskfs0ewkl")
@@ -233,7 +223,7 @@ class DummyServerIntegrationTest extends FunSuite with DummyPayload with BeforeA
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
-    Thread.sleep(5000)
+    //    Thread.sleep(5000)
 
     // when
     val (code: Int, json: JValue) = httpQuery.get(s"$url${DummyCreator.STUB_CONFIGURATION}")
@@ -278,7 +268,7 @@ class DummyServerIntegrationTest extends FunSuite with DummyPayload with BeforeA
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
-    Thread.sleep(5000)
+    //    Thread.sleep(5000)
 
     // when
     val (code: Int, json: JValue) = httpQuery.post(
@@ -311,7 +301,7 @@ class DummyServerIntegrationTest extends FunSuite with DummyPayload with BeforeA
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
-    Thread.sleep(5000)
+    //    Thread.sleep(5000)
 
     // when
     val (code: Int, json: JValue) = httpQuery.post(

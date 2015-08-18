@@ -3,14 +3,11 @@
  */
 
 import java.io.File
-import java.nio.file.Files
 
 import com.isightpartners.qa.teddy.HttpQuery
 import com.isightpartners.qa.teddy.creator.{DummyCreator, ScenarioCreator}
-import com.isightpartners.qa.teddy.db.ESDB
 import com.isightpartners.qa.teddy.model.{Configuration, Path, Server}
 import com.isightpartners.qa.teddy.service.StubService
-import org.apache.commons.io.FileUtils
 import org.json4s.JsonAST.JValue
 import org.json4s.jackson.JsonMethods._
 import org.scalatest.{BeforeAndAfterEach, FunSuite}
@@ -31,16 +28,11 @@ class ScenarioServerIntegrationTest extends FunSuite with ScenarioPayload with B
   var port: Int = _
 
   override protected def beforeEach() = {
-    elasticData = Files.createTempDirectory("elasticsearch_data_recovery_test").toFile
-    service = new StubService(ScenarioCreator, new ESDB(elastic_home = elasticData.getAbsolutePath, "test"))
+    service = new StubService(ScenarioCreator, new TestDB)
   }
 
   override protected def afterEach() = {
-    try {
-      FileUtils.forceDelete(elasticData)
-    } catch {
-      case e: Exception => println("exception during deleting: " + elasticData)
-    }
+    service.clean()
   }
 
   test("loaded configuration ok") {
@@ -50,7 +42,7 @@ class ScenarioServerIntegrationTest extends FunSuite with ScenarioPayload with B
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
-    Thread.sleep(5000)
+    //Thread.sleep(5000)
 
     // when
     val (code: Int, json: JValue) = httpQuery.post(
@@ -116,7 +108,7 @@ class ScenarioServerIntegrationTest extends FunSuite with ScenarioPayload with B
     port = jsonLoad.extract[Server].port
 
     val url: String = s"http://localhost:${port}"
-    Thread.sleep(5000)
+    //    Thread.sleep(5000)
 
     // when
     val (code: Int, json: JValue) = httpQuery.get(s"$url${DummyCreator.STUB_CONFIGURATION}")

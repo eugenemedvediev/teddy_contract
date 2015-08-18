@@ -29,7 +29,12 @@ class StubService(creator: Creator, db: DB) extends Service with HttpQuery with 
       db.writeConfiguration(name, configuration)
       status(name)
     } else "message" -> "reached limit of servers"
+  }
 
+  def clean(): Unit = {
+    for (name <- serverNames.filter(servers.keySet.contains)) {
+      delete(name)
+    }
   }
 
   def update(name: String, configuration: Configuration): JValue = {

@@ -3,9 +3,8 @@
  */
 
 import com.isightpartners.qa.teddy.creator.DummyCreator
-import com.isightpartners.qa.teddy.db.DB
-import com.isightpartners.qa.teddy.service.StubService
 import com.isightpartners.qa.teddy.model.{Configuration, Server}
+import com.isightpartners.qa.teddy.service.StubService
 import org.json4s.JsonAST.JValue
 import org.json4s.jackson.JsonMethods._
 import org.scalatest.FunSuite
@@ -17,23 +16,12 @@ import org.scalatest.FunSuite
  */
 class ServiceIntegrationTest extends FunSuite with DummyPayload {
 
-  private val service: StubService = new StubService(DummyCreator, new DB {
-    def writeConfiguration(name: String, configuration: Configuration) = {}
-
-    def getAllStartedConfigurations: List[(String, Configuration)] = List[(String, Configuration)]()
-
-    def deleteConfiguration(name: String) = {}
-
-    def setStarted(name: String, started: Boolean) = {}
-
-    def readConfiguration(name: String): Configuration = new Configuration()
-  })
-
+  private val service: StubService = new StubService(DummyCreator, new TestDB)
 
   test("create server") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
-    val configuration: Configuration = parse(NEW_DUMMY_CONFIGURATION).extract[Configuration]
+    val configuration: Configuration = parse(DUMMY_CONFIGURATION).extract[Configuration]
 
     // when
     val json: JValue = service.create(configuration)
@@ -49,7 +37,7 @@ class ServiceIntegrationTest extends FunSuite with DummyPayload {
   test("delete server") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
-    val configuration: Configuration = parse(NEW_DUMMY_CONFIGURATION).extract[Configuration]
+    val configuration: Configuration = parse(DUMMY_CONFIGURATION).extract[Configuration]
     val createJson: JValue = service.create(configuration)
     val createServer: Server = createJson.extract[Server]
     var status: List[Server] = service.statusAll.extract[Array[Server]].toList
@@ -66,7 +54,7 @@ class ServiceIntegrationTest extends FunSuite with DummyPayload {
   test("load server") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
-    val configuration: Configuration = parse(NEW_DUMMY_CONFIGURATION).extract[Configuration]
+    val configuration: Configuration = parse(DUMMY_CONFIGURATION).extract[Configuration]
     val createJson: JValue = service.create(configuration)
     val createServer: Server = createJson.extract[Server]
 

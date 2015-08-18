@@ -43,7 +43,7 @@ object DummyCreator extends Creator {
             StaticServerResponse(APPLICATION_JSON, """{"contract_error":"no any scenarios with specified header"}""", 503)
           } else if (filteredScenarios.exists(emptyBodyCondition) || filteredScenarios.exists(bodyCondition)) {
             implicit lazy val formats = org.json4s.DefaultFormats
-            println("test" + request.getContent)
+//            println("test" + request.getContent)
             val scenario: Scenario = if (request.getContent.isEmpty || request.getContent == "{}")
               filteredScenarios.filter(emptyBodyCondition).head
             else

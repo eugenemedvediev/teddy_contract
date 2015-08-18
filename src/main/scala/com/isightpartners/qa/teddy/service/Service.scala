@@ -15,6 +15,7 @@ trait Service {
   def create(configuration: Configuration): JValue
   def update(name: String, configuration: Configuration): JValue
   def delete(name: String): Unit
+  def clean(): Unit
   def status(name: String): JValue
   def statusAll(): JValue
 }

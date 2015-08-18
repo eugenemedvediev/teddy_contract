@@ -77,16 +77,16 @@ class ESDB(val elastic_home: String, val indexName: String) extends DB {
   def getAllStartedConfigurations: List[(String, Configuration)] = {
     try {
       val existsFeature: Future[IndicesExistsResponse] = client.exists(indexName)
-      val result: IndicesExistsResponse = Await.result(existsFeature, 5 second)
+      val result: IndicesExistsResponse = Await.result(existsFeature, 120 second)
       if (result.isExists) {
         val execute: Future[SearchResponse] = client.execute {
           search in indexName -> mapping query {
             term("started", true)
           } sort (by field "_id")
         }
-        val searchResult: SearchResponse = Await.result(execute, 5 second)
+        val searchResult: SearchResponse = Await.result(execute, 120 second)
         implicit lazy val formats = org.json4s.DefaultFormats
-        println(searchResult.getHits.getHits)
+//        println(searchResult.getHits.getHits)
         searchResult.getHits.getHits.toList.map(p => (p.getId, new Configuration(p.getSource.get("description").toString, parse(p.getSource.get("api").toString).extract[List[Path]])))
       } else {
         client.execute {
