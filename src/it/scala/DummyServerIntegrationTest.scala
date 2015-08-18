@@ -21,7 +21,7 @@ import org.scalatest.{BeforeAndAfterEach, FunSuite}
  * @author Ievgen Medvediev (imedvediev@isightpartners.com)
  * @since 4/10/15
  */
-class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndAfterEach {
+class DummyServerIntegrationTest extends FunSuite with DummyPayload with BeforeAndAfterEach {
 
   case class WorkingServerConfigurationResponse(name: String, description: String, api: List[Path])
 
@@ -46,7 +46,7 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
 
   }
 
-  test("loaded configuration ok scenario 1") {
+  test("loaded configuration ok path 1 scenario 1") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
     val jsonLoad: JValue = service.create(parse(DUMMY_FULL_CONFIGURATION).extract[Configuration])
@@ -64,26 +64,29 @@ class WorkingServerIntegrationTest extends FunSuite with Payload with BeforeAndA
         "Authorization" -> "Token blablabla"
       ),
       parse(
-        """{
-          |            "server": "Angel",
-          |            "description": "Angel Server Description"
-          |          }""".stripMargin)
+        """
+          |{
+          |  "server": "Angel",
+          |  "description": "Angel Server Description"
+          |}
+        """.stripMargin)
     )
 
     // then
     assert(code === 200)
     val expected: JValue = parse(
-      """{
-        |            "id": 1,
-        |            "server": "Angel",
-        |            "description": "Angel Server Description",
-        |            "port": 8090
-        |          }
+      """
+        |{
+        |  "id": 1,
+        |  "server": "Angel",
+        |  "description": "Angel Server Description",
+        |  "port": 8090
+        |}
       """.stripMargin)
     assert(json === expected)
   }
 
-  test("load configuration ok scenario 2") {
+  test("load configuration ok path 1 scenario 2") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
     val jsonLoad: JValue = service.create(parse(DUMMY_FULL_CONFIGURATION).extract[Configuration])

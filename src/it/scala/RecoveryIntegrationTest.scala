@@ -19,7 +19,7 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite}
  * @author Ievgen Medvediev (imedvediev@isightpartners.com)
  * @since 4/13/15
  */
-class RecoveryIntegrationTest extends FunSuite with Payload with BeforeAndAfterAll {
+class RecoveryIntegrationTest extends FunSuite with DummyPayload with BeforeAndAfterAll {
 
   var service: StubService = _
   var elasticData: File = _

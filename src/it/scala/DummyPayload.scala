@@ -7,7 +7,7 @@
  * @author Ievgen Medvediev (imedvediev@isightpartners.com)
  * @since 4/7/15
  */
-trait Payload {
+trait DummyPayload {
 
   val DUMMY_CONFIGURATION =
     """{

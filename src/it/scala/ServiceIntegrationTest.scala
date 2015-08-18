@@ -15,7 +15,7 @@ import org.scalatest.FunSuite
  * @author Ievgen Medvediev (imedvediev@isightpartners.com)
  * @since 4/7/15
  */
-class ServiceIntegrationTest extends FunSuite with Payload {
+class ServiceIntegrationTest extends FunSuite with DummyPayload {
 
   private val service: StubService = new StubService(DummyCreator, new DB {
     def writeConfiguration(name: String, configuration: Configuration) = {}
