@@ -1,5 +1,5 @@
 {
-  "description": "Dummy Test Configuration",
+  "description": "Scenario Test Configuration",
   "api": [
     {
       "method": "POST",
@@ -29,28 +29,6 @@
               "port": 8090
             },
             "code": 200
-          }
-        },
-        {
-          "name": "bad request",
-          "request": {
-            "headers": {
-              "Content-Type": "application/json",
-              "Accept": "application/json",
-              "Authorization": "Token blablabla"
-            },
-            "body": {
-              "description": "Angel Server Description"
-            }
-          },
-          "response": {
-            "headers": {
-              "Content-Type": "application/json"
-            },
-            "body": {
-              "error": "Field 'server' is required"
-            },
-            "code": 400
           }
         }
       ]
@@ -82,28 +60,6 @@
               "content": "google today"
             },
             "code": 200
-          }
-        },
-        {
-          "name": "bad request",
-          "request": {
-            "headers": {
-              "Content-Type": "application/json",
-              "Accept": "application/json",
-              "Authorization": "Token blablabla"
-            },
-            "body": {
-              "content": "google today"
-            }
-          },
-          "response": {
-            "headers": {
-              "Content-Type": "application/json"
-            },
-            "body": {
-              "error": "Field 'title' is required"
-            },
-            "code": 400
           }
         }
       ]

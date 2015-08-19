@@ -25,14 +25,14 @@ object StubLoader extends App {
 
   case class Server(host: String, port: Int, root: String)
 
-  val httpQuery = new HttpQuery{}
+  val httpQuery = new HttpQuery {}
 
   val jsonProperties = Map(
     "Accept" -> "application/json",
     "Content-Type" -> "application/json"
   )
 
-  def backup(host: String, port: Int, root: String): Unit = {
+  def backup(host: String, stubType: String): Unit = {
     def httpGetToFile(url: String): String = {
       val get = new HttpGet(url)
       setProperties(get, jsonProperties)
@@ -42,7 +42,6 @@ object StubLoader extends App {
       else
         throw new IllegalStateException(s"Error during getting status to file")
     }
-
 
     def writeToFile(response: CloseableHttpResponse): String = {
       if (response.getEntity != null && response.getEntity.getContent != null) {
@@ -69,28 +68,40 @@ object StubLoader extends App {
     }
 
     try {
-      val backupFile: String = httpGetToFile(s"http://$host:$port$root/servers")
+      val backupFile: String = httpGetToFile(s"$host/$stubType")
       println(s"Backup file: $backupFile")
     } catch {
       case ex: Throwable => println("Failed to backup:\n%s".format(ex.printStackTrace()))
     }
   }
 
-  def restore(host: String, port: Int, root: String, file: String): Unit = {
+  def restore(host: String, stubType: String, file: String): Unit = {
     def createServer(): JValue = {
-      val post = new HttpPost(s"http://$host:$port$root/servers")
+      val url: String = s"$host/$stubType"
+      println(url)
+      val post = new HttpPost(s"$host/$stubType")
+      post.setEntity(new StringEntity(
+        """
+          |{
+          |  "description":"fake",
+          |  "api":[]
+          |}
+        """.stripMargin, ContentType.APPLICATION_JSON))
       setProperties(post, jsonProperties)
       val response = HttpClients.createDefault().execute(post)
       val code: Int = response.getStatusLine.getStatusCode
-      if (code == 200)
+      if (code == 200) {
         httpQuery.getContent(response)
-      else
+      }
+      else {
+        println(s"Status code: $code")
+        println(pretty(httpQuery.getContent(response)))
         throw new IllegalStateException("Error during getting status")
-
+      }
     }
 
     def putCommand(name: String, payload: String): JValue = {
-      val put = new HttpPut(s"http://$host:$port$root/servers/$name")
+      val put = new HttpPut(s"$host/$stubType/$name")
       setProperties(put, jsonProperties)
       put.setEntity(new StringEntity(payload, ContentType.APPLICATION_JSON))
       val response = HttpClients.createDefault().execute(put)
@@ -105,16 +116,14 @@ object StubLoader extends App {
     def loadServer(server: ServerModel): Unit = {
       if (server.started) {
         implicit lazy val formats = org.json4s.DefaultFormats
-        val payload: String = """{
-                                | "command":"load",
-                                | "configuration":{
-                                |   "description":"%s",
-                                |   "api":%s
-                                | }
-                                |}""".stripMargin.format(server.description, Serialization.write(server.api))
+        val payload: String =
+          """{
+            |   "description":"%s",
+            |   "api":%s
+            |}""".stripMargin.format(server.description, Serialization.write(server.api))
         putCommand(server.name, payload)
       } else {
-        httpDelete(s"http://$host:$port$root/servers/${server.name}")
+        httpDelete(s"$host/$stubType/${server.name}")
       }
     }
 
@@ -122,13 +131,13 @@ object StubLoader extends App {
       val startedServers: List[String] = list.filter(server => server.started).map(server => server.name)
       for (server <- getAllServerNames) {
         if (!startedServers.contains(server)) {
-          httpDelete(s"http://$host:$port$root/servers/$server")
+          httpDelete(s"$host/$stubType/$server")
         }
       }
     }
 
     def getAllServerNames: List[String] = {
-      val status: JValue = httpGet(s"http://$host:$port$root/servers")
+      val status: JValue = httpGet(s"$host/$stubType")
       implicit lazy val formats = org.json4s.DefaultFormats
       val servers: List[ServerModel] = status.extract[Array[ServerModel]].toList
       servers.map(server => server.name)
@@ -156,45 +165,66 @@ object StubLoader extends App {
     val json: JValue = parse(scala.io.Source.fromFile(file).getLines().mkString)
     implicit lazy val formats = org.json4s.DefaultFormats
     val servers: List[ServerModel] = json.extract[Array[ServerModel]].toList
+    var i = 1
     while (!createServer().extract[Map[String, Object]].getOrElse("message", "").equals("reached limit of servers")) {
+      println(i)
+      i += 1
     }
     servers.foreach(loadServer)
     deleteRedundantServers(servers)
-    println(s"restored: GET http://$host:$port$root/servers")
+    println(s"restored: GET $host/$stubType")
   }
 
 
-  def loadServer(host: String, name: String, file: String): Unit = {
+  def createServer(host: String, stubType: String, file: String): Unit = {
 
-    def putCommand(name: String, payload: String): JValue = {
-      val put = new HttpPut(s"$host/servers/$name")
-      setProperties(put, jsonProperties)
-      put.setEntity(new StringEntity(payload, ContentType.APPLICATION_JSON))
-      val response = HttpClients.createDefault().execute(put)
+    def postCommand(payload: String): JValue = {
+      val url = s"$host/$stubType"
+      val post = new HttpPost(url)
+      setProperties(post, jsonProperties)
+      post.setEntity(new StringEntity(payload, ContentType.APPLICATION_JSON))
+      val response = HttpClients.createDefault().execute(post)
       val code: Int = response.getStatusLine.getStatusCode
-      if (code == 200)
+      println(code)
+      if (code == 200) {
         httpQuery.getContent(response)
-      else
-        throw new IllegalStateException(s"Put command error for server $name")
-
-    }
-
-    def loadConfiguration(configuration: Configuration): Unit = {
-        implicit lazy val formats = org.json4s.DefaultFormats
-        val payload: String = """{
-                                | "command":"load",
-                                | "configuration":{
-                                |   "description":"%s",
-                                |   "api":%s
-                                | }
-                                |}""".stripMargin.format(configuration.description, Serialization.write(configuration.api))
-        putCommand(name, payload)
+      }
+      else {
+        println(s"Status code: $code")
+        println(pretty(httpQuery.getContent(response)))
+        throw new IllegalStateException(s"Post command error")
+      }
     }
 
     val json: JValue = parse(scala.io.Source.fromFile(file).getLines().mkString)
     implicit lazy val formats = org.json4s.DefaultFormats
-    loadConfiguration(json.extract[Configuration])
-    println(s"restored: GET $host/servers/$name")
+    val response: JValue = postCommand(compact(json))
+    println(s"Created: \n${pretty(response)}")
+  }
+
+
+  def updateServer(host: String, stubType: String, name: String, file: String): Unit = {
+
+    def putCommand(payload: String): JValue = {
+      val put = new HttpPut(s"$host/$stubType/$name")
+      setProperties(put, jsonProperties)
+      put.setEntity(new StringEntity(payload, ContentType.APPLICATION_JSON))
+      val response = HttpClients.createDefault().execute(put)
+      val code: Int = response.getStatusLine.getStatusCode
+      if (code == 200) {
+        httpQuery.getContent(response)
+      }
+      else {
+        println(s"Status code: $code")
+        println(pretty(httpQuery.getContent(response)))
+        throw new IllegalStateException(s"Put command error for server $name")
+      }
+    }
+
+    val json: JValue = parse(scala.io.Source.fromFile(file).getLines().mkString)
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val response: JValue = putCommand(compact(json))
+    println(s"Updated: \n${pretty(response)}")
   }
 
   def setProperties(request: HttpRequestBase, properties: Map[String, String]) = properties.foreach {
@@ -203,23 +233,28 @@ object StubLoader extends App {
 
   def printHelp(message: String): Unit = {
     println(s"$message: ")
-    println("\tbackup <host> <port> <root> (backup 10.102.50.24 8080 /stub)")
-    println("\trestore <host> <port> <root> <file> (restore localhost 8080 /stub /var/folders/nx/tpm0cxm17ds1pxg3x75nx9340000gn/T/status_14284185215115647502452719358028.json)")
-    println("\tloadServer <stub_host_root> <server_name> (loadServer http://localhost:8080/stub Angel configurations/wires.json)")
+    println("\tbackup <stub_host> <stub_type> (backup http://10.102.50.24:8080 {scenarios | dummies})")
+    println("\trestore <stub_host> <stub_type> <file_path> (restore http://localhost:8080 {scenarios | dummies} /var/folders/nx/tpm0cxm17ds1pxg3x75nx9340000gn/T/status_14284185215115647502452719358028.json)")
+    println("\tupdateServer <stub_host> <stub_type> <server_name> <file_path> (updateServer http://localhost:8080 {scenarios | dummies} Angel configurations/wires.json)")
+    println("\tcreateServer <stub_host> <stub_type> <file_path>(createServer http://localhost:8080 {scenarios | dummies} configurations/wires.json)")
   }
 
   if (args.length > 0) {
     args(0) match {
-      case "loadServer" => args.length match {
-        case 4 => loadServer(host = args(1), name = args(2), file = args(3))
-        case _ => printHelp("not correct arguments size fo command loadServer")
+      case "updateServer" => args.length match {
+        case 5 => updateServer(host = args(1), stubType = args(2), name = args(3), file = args(4))
+        case _ => printHelp("not correct arguments size fo command updateServer")
+      }
+      case "createServer" => args.length match {
+        case 4 => createServer(host = args(1), stubType = args(2), file = args(3))
+        case _ => printHelp("not correct arguments size fo command createServer")
       }
       case "restore" => args.length match {
-        case 5 => restore(host = args(1), port = args(2).toInt, root = args(3), file = args(4))
+        case 4 => restore(host = args(1), stubType = args(2), file = args(3))
         case _ => printHelp("not correct arguments size fo command restore")
       }
       case "backup" => args.length match {
-        case 4 => backup(host = args(1), port = args(2).toInt, root = args(3))
+        case 3 => backup(host = args(1), stubType = args(2))
         case _ => printHelp("not correct arguments size fo command backup")
       }
       case command: String => printHelp(s"unknown command: $command")

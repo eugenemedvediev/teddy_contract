@@ -13,11 +13,12 @@ import org.json4s.jackson.Serialization
  */
 object ScenarioCreator extends Creator {
 
-  var index = 0
+  var amount = 0
+
   override def createServerRoutes(list: List[Path]): List[ServerRoute] = {
     val myMap = collection.mutable.Map[(String, String), Map[Int, Scenario]]()
     val map1: List[((String, String), Scenario)] = list.map(path => ((path.path, path.method), path.scenarios.head))
-    for (i <- 0 to map1.size-1){
+    for (i <- 0 to map1.size - 1) {
       val key: (String, String) = map1(i)._1
       val value: Scenario = map1(i)._2
 
@@ -28,8 +29,9 @@ object ScenarioCreator extends Creator {
         myMap.put(key, existingPath + (i -> value))
       }
     }
-
-    myMap.foldLeft(List[ServerRoute]())( (list, elem) => createServerRoute(elem)::list)
+    index = 0
+    amount = map1.size
+    myMap.foldLeft(List[ServerRoute]())((list, elem) => createServerRoute(elem) :: list)
 
   }
 
@@ -47,16 +49,19 @@ object ScenarioCreator extends Creator {
           StaticServerResponse(APPLICATION_JSON, """{"contract_error":"no any scenarios with specified header"}""", 503)
         } else if (filteredScenarios.exists(emptyBodyCondition) || filteredScenarios.exists(bodyCondition)) {
           implicit lazy val formats = org.json4s.DefaultFormats
-//          println("test" + request.getContent)
+          //          println("test" + request.getContent)
           val scenario: Scenario = if (request.getContent.isEmpty || request.getContent == "{}")
             filteredScenarios.filter(emptyBodyCondition).head
           else
             filteredScenarios.filter(bodyCondition).head
-          if (elem._2.getOrElse(index, null) == scenario){
-            index += 1
+          if (elem._2.getOrElse(index, null) == scenario) {
+            if (index+1 == amount)
+              index = 0
+            else
+              index += 1
             StaticServerResponse(fr.simply.util.ContentType(scenario.response.headers.getOrElse("Content-Type", "application/json")), Serialization.write(scenario.response.body), scenario.response.code, scenario.response.headers)
           } else {
-            StaticServerResponse(APPLICATION_JSON, """{"scenario_error":"not acceptable step"}""", 503)
+            StaticServerResponse(APPLICATION_JSON, """{"scenario_error":"not acceptable step, expecting step #%s"}""".format(index+1), 503)
           }
         } else {
           StaticServerResponse(APPLICATION_JSON, """{"contract_error":"no any scenarios with specified body"}""", 503)

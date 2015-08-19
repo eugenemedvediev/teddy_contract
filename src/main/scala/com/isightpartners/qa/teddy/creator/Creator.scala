@@ -18,7 +18,13 @@ import org.simpleframework.http.Request
  */
 trait Creator {
 
+  var index: Int = 0
+
   def createServerRoutes(list: List[Path]): List[ServerRoute]
+
+  def reset(): Unit = {
+    index = 0
+  }
 
   val STUB_CONFIGURATION = "/stub/configuration"
 

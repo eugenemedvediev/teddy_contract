@@ -101,6 +101,332 @@ class ScenarioServerIntegrationTest extends FunSuite with ScenarioPayload with B
     assert(json2 === expected2)
   }
 
+  test("loaded configuration step twice") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val jsonLoad: JValue = service.create(parse(SCENARIO_CONFIGURATION).extract[Configuration])
+    port = jsonLoad.extract[Server].port
+
+    val url: String = s"http://localhost:${port}"
+    //Thread.sleep(5000)
+
+    // when
+    val (code: Int, json: JValue) = httpQuery.post(
+      s"$url/wires/servers",
+      Map(
+        "Accept" -> "application/json",
+        "Content-Type" -> "application/json",
+        "Authorization" -> "Token blablabla"
+      ),
+      parse(
+        """
+          |{
+          |  "server": "Angel",
+          |  "description": "Angel Server Description"
+          |}
+        """.stripMargin)
+    )
+
+    // then
+    assert(code === 200)
+    val expected: JValue = parse(
+      """
+        |{
+        |  "id": 1,
+        |  "server": "Angel",
+        |  "description": "Angel Server Description",
+        |  "port": 8090
+        |}
+      """.stripMargin)
+    assert(json === expected)
+
+    // and when
+    val (code2: Int, json2: JValue) = httpQuery.post(
+      s"$url/wires/servers",
+      Map(
+        "Accept" -> "application/json",
+        "Content-Type" -> "application/json",
+        "Authorization" -> "Token blablabla"
+      ),
+      parse(
+        """
+          |{
+          |  "server": "Angel",
+          |  "description": "Angel Server Description"
+          |}
+        """.stripMargin)
+    )
+
+    // then
+    assert(code2 === 503)
+    val expected2: JValue = parse(
+      """{
+        |  "scenario_error": "not acceptable step, expecting step #2"
+        |}""".stripMargin)
+    assert(json2 === expected2)
+  }
+
+  test("loaded configuration reset") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val jsonLoad: JValue = service.create(parse(SCENARIO_CONFIGURATION).extract[Configuration])
+    port = jsonLoad.extract[Server].port
+
+    val url: String = s"http://localhost:${port}"
+    //Thread.sleep(5000)
+
+    // when
+    val (code: Int, json: JValue) = httpQuery.post(
+      s"$url/wires/servers",
+      Map(
+        "Accept" -> "application/json",
+        "Content-Type" -> "application/json",
+        "Authorization" -> "Token blablabla"
+      ),
+      parse(
+        """
+          |{
+          |  "server": "Angel",
+          |  "description": "Angel Server Description"
+          |}
+        """.stripMargin)
+    )
+
+    // then
+    assert(code === 200)
+    val expected: JValue = parse(
+      """
+        |{
+        |  "id": 1,
+        |  "server": "Angel",
+        |  "description": "Angel Server Description",
+        |  "port": 8090
+        |}
+      """.stripMargin)
+    assert(json === expected)
+
+    // and when
+    service.reset()
+    val (code2: Int, json2: JValue) = httpQuery.post(
+      s"$url/wires/servers",
+      Map(
+        "Accept" -> "application/json",
+        "Content-Type" -> "application/json",
+        "Authorization" -> "Token blablabla"
+      ),
+      parse(
+        """
+          |{
+          |  "server": "Angel",
+          |  "description": "Angel Server Description"
+          |}
+        """.stripMargin)
+    )
+
+    // then
+    assert(code2 === 200)
+    val expected2: JValue = parse(
+      """
+        |{
+        |  "id": 1,
+        |  "server": "Angel",
+        |  "description": "Angel Server Description",
+        |  "port": 8090
+        |}
+      """.stripMargin)
+    assert(json2 === expected2)
+  }
+
+
+  test("loaded configuration step 2 twice") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val jsonLoad: JValue = service.create(parse(SCENARIO_CONFIGURATION).extract[Configuration])
+    port = jsonLoad.extract[Server].port
+
+    val url: String = s"http://localhost:${port}"
+    //Thread.sleep(5000)
+
+    // when
+    val (code: Int, json: JValue) = httpQuery.post(
+      s"$url/wires/servers",
+      Map(
+        "Accept" -> "application/json",
+        "Content-Type" -> "application/json",
+        "Authorization" -> "Token blablabla"
+      ),
+      parse(
+        """
+          |{
+          |  "server": "Angel",
+          |  "description": "Angel Server Description"
+          |}
+        """.stripMargin)
+    )
+
+    // then
+    assert(code === 200)
+    val expected: JValue = parse(
+      """
+        |{
+        |  "id": 1,
+        |  "server": "Angel",
+        |  "description": "Angel Server Description",
+        |  "port": 8090
+        |}
+      """.stripMargin)
+    assert(json === expected)
+
+    // and when
+    val (code2: Int, json2: JValue) = httpQuery.post(
+      s"$url/wires/savedsearches",
+      Map(
+        "Accept" -> "application/json",
+        "Content-Type" -> "application/json",
+        "Authorization" -> "Token blablabla"
+      ),
+      parse(
+        """
+          |{
+          |  "title": "google",
+          |  "content": "google today"
+          |}""".stripMargin)
+    )
+
+    // then
+    assert(code2 === 200)
+    val expected2: JValue = parse(
+      """{
+        |  "id": 1,
+        |  "title": "google",
+        |  "content": "google today"
+        |}""".stripMargin)
+    assert(json2 === expected2)
+
+    // and when
+    val (code3: Int, json3: JValue) = httpQuery.post(
+      s"$url/wires/savedsearches",
+      Map(
+        "Accept" -> "application/json",
+        "Content-Type" -> "application/json",
+        "Authorization" -> "Token blablabla"
+      ),
+      parse(
+        """
+          |{
+          |  "title": "google",
+          |  "content": "google today"
+          |}""".stripMargin)
+    )
+
+    // then
+    assert(code3 === 503)
+    val expected3: JValue = parse(
+      """{
+        |  "scenario_error": "not acceptable step, expecting step #1"
+        |}""".stripMargin)
+    assert(json3 === expected3)
+
+  }
+
+  test("loaded configuration full scenario round") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val jsonLoad: JValue = service.create(parse(SCENARIO_CONFIGURATION).extract[Configuration])
+    port = jsonLoad.extract[Server].port
+
+    val url: String = s"http://localhost:${port}"
+    //Thread.sleep(5000)
+
+    // when
+    val (code: Int, json: JValue) = httpQuery.post(
+      s"$url/wires/servers",
+      Map(
+        "Accept" -> "application/json",
+        "Content-Type" -> "application/json",
+        "Authorization" -> "Token blablabla"
+      ),
+      parse(
+        """
+          |{
+          |  "server": "Angel",
+          |  "description": "Angel Server Description"
+          |}
+        """.stripMargin)
+    )
+
+    // then
+    assert(code === 200)
+    val expected: JValue = parse(
+      """
+        |{
+        |  "id": 1,
+        |  "server": "Angel",
+        |  "description": "Angel Server Description",
+        |  "port": 8090
+        |}
+      """.stripMargin)
+    assert(json === expected)
+
+    // and when
+    val (code2: Int, json2: JValue) = httpQuery.post(
+      s"$url/wires/savedsearches",
+      Map(
+        "Accept" -> "application/json",
+        "Content-Type" -> "application/json",
+        "Authorization" -> "Token blablabla"
+      ),
+      parse(
+        """
+          |{
+          |  "title": "google",
+          |  "content": "google today"
+          |}""".stripMargin)
+    )
+
+    // then
+    assert(code2 === 200)
+    val expected2: JValue = parse(
+      """{
+        |  "id": 1,
+        |  "title": "google",
+        |  "content": "google today"
+        |}""".stripMargin)
+    assert(json2 === expected2)
+
+    // and when
+    val (code3: Int, json3: JValue) = httpQuery.post(
+      s"$url/wires/servers",
+      Map(
+        "Accept" -> "application/json",
+        "Content-Type" -> "application/json",
+        "Authorization" -> "Token blablabla"
+      ),
+      parse(
+        """
+          |{
+          |  "server": "Angel",
+          |  "description": "Angel Server Description"
+          |}
+        """.stripMargin)
+    )
+
+    // then
+    assert(code3 === 200)
+    val expected3: JValue = parse(
+      """
+        |{
+        |  "id": 1,
+        |  "server": "Angel",
+        |  "description": "Angel Server Description",
+        |  "port": 8090
+        |}
+      """.stripMargin)
+    assert(json3 === expected3)
+
+  }
+
+
   test("configuration page") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats

@@ -40,10 +40,15 @@ class StubServlet(creator: Creator, db: DB) extends HttpServlet {
       if (path != null && path.startsWith("/")) {
         response.setStatus(HttpServletResponse.SC_OK)
         val name: String = path.drop(1)
-        val json: JValue = parse(request.getInputStream)
-        implicit val formats = DefaultFormats
-        val configuration = json.extract[Configuration]
-        service.update(name, configuration)
+        if (name.endsWith("/reset")) {
+          service.reset()
+          "status" -> "reset"
+        } else {
+          val json: JValue = parse(request.getInputStream)
+          implicit val formats = DefaultFormats
+          val configuration = json.extract[Configuration]
+          service.update(name, configuration)
+        }
       } else {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST)
         "error" -> "server name hasn't been provided"
