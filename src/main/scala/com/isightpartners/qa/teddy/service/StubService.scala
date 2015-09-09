@@ -61,7 +61,7 @@ class StubService(creator: Creator, db: DB) extends Service with HttpQuery with 
   }
 
   def status(name: String): JValue = {
-    ping(s"http://localhost:${servers.get(name).get.portInUse}${creator.STUB_CONFIGURATION}", name, servers.get(name).get.portInUse)
+    ping(s"http://localhost:${servers.get(name).get.portInUse}${creator.DUMMY_CONFIGURATION}", name, servers.get(name).get.portInUse)
   }
 
   def statusAll: JValue = {

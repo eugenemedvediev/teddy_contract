@@ -6,12 +6,29 @@
       "path": "/wires/servers",
       "scenarios": [
         {
+          "name": "Required Authorization header",
+          "request": {
+            "headers": {
+              "!Authorization": null
+            },
+            "body": null
+          },
+          "response": {
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "error": "Authorization header is missing"
+            },
+            "code": 400
+          }
+        },
+        {
           "name": "ok",
           "request": {
             "headers": {
               "Content-Type": "application/json",
-              "Accept": "application/json",
-              "Authorization": "Token blablabla"
+              "Accept": "application/json"
             },
             "body": {
               "server": "Angel",
@@ -36,8 +53,7 @@
           "request": {
             "headers": {
               "Content-Type": "application/json",
-              "Accept": "application/json",
-              "Authorization": "Token blablabla"
+              "Accept": "application/json"
             },
             "body": {
               "description": "Angel Server Description"

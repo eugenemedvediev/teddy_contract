@@ -26,7 +26,7 @@ trait Creator {
     index = 0
   }
 
-  val STUB_CONFIGURATION = "/stub/configuration"
+  val DUMMY_CONFIGURATION = "/_dummy_/configuration"
 
   val DEFAULT_WORKING_SERVER_DESCRIPTION = "working server"
 
@@ -58,11 +58,11 @@ trait Creator {
     parse(scala.io.Source.fromInputStream(getClass.getClassLoader.getResource(name).openStream()).getLines().mkString)
   }
 
-  def createWorkingServer(name: String, description: String, api: List[Path]) = new StubServer(8090, (createStubConfigurationServerRoute(name, description, api) :: createServerRoutes(api)).toArray: _*).defaultResponse(APPLICATION_JSON, """{"contract_error":"not supported path or method by contract; check configuration GET %s"}""".format(STUB_CONFIGURATION), 404)
+  def createWorkingServer(name: String, description: String, api: List[Path]) = new StubServer(8090, (createStubConfigurationServerRoute(name, description, api) :: createServerRoutes(api)).toArray: _*).defaultResponse(APPLICATION_JSON, """{"contract_error":"not supported path or method by contract; check configuration GET %s"}""".format(DUMMY_CONFIGURATION), 404)
 
   def createStubConfigurationServerRoute(name: String, description: String, api: List[Path]): ServerRoute = {
     GET(
-      path = STUB_CONFIGURATION,
+      path = DUMMY_CONFIGURATION,
       response = DynamicServerResponse({ request =>
         implicit val formats = DefaultFormats
         val server: String = compact(
@@ -112,5 +112,19 @@ trait Creator {
       )
     }
   }
+
+  def getScenariosWithRequiredHeaders(scenarios: List[Scenario], headers: Map[String, String]): List[Scenario] = {
+    val withRequiredHeaders: List[Scenario] = scenarios.filter(scenario =>
+      scenario.request.headers.exists(h => h._1.startsWith("!"))
+    )
+    if (headers.isEmpty) {
+      withRequiredHeaders
+    } else {
+      withRequiredHeaders.filter(scenario =>
+        scenario.request.headers.exists(h => !headers.contains(h._1.substring(1)) || (h._2 != null && headers.getOrElse(h._1.substring(1), null) != h._2))
+      )
+    }
+  }
+
 
 }

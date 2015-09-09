@@ -437,7 +437,7 @@ class ScenarioServerIntegrationTest extends FunSuite with ScenarioPayload with B
     //    Thread.sleep(5000)
 
     // when
-    val (code: Int, json: JValue) = httpQuery.get(s"$url${DummyCreator.STUB_CONFIGURATION}")
+    val (code: Int, json: JValue) = httpQuery.get(s"$url${DummyCreator.DUMMY_CONFIGURATION}")
 
     // then
     assert(code === 200)

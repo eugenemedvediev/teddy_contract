@@ -32,6 +32,12 @@ val itTestFilter: String => Boolean = { name =>
 
 testOptions in IntegrationTest += Tests.Filter(itTestFilter)
 
-mainClass := Some("com.isightpartners.qa.teddy.util.StubLoader")
+//mainClass := Some("com.isightpartners.qa.teddy.util.StubLoader")
 
 parallelExecution in IntegrationTest := true
+
+import com.github.retronym.SbtOneJar._
+
+oneJarSettings
+
+mainClass in oneJar := Some("com.isightpartners.qa.dummy.DummyServer")

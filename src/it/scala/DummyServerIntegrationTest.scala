@@ -212,7 +212,7 @@ class DummyServerIntegrationTest extends FunSuite with DummyPayload with BeforeA
 
     // then
     assert(code === 404)
-    val expected: JValue = "contract_error" -> "not supported path or method by contract; check configuration GET /stub/configuration"
+    val expected: JValue = "contract_error" -> "not supported path or method by contract; check configuration GET /_dummy_/configuration"
     assert(json === expected)
   }
 
@@ -226,7 +226,7 @@ class DummyServerIntegrationTest extends FunSuite with DummyPayload with BeforeA
     //    Thread.sleep(5000)
 
     // when
-    val (code: Int, json: JValue) = httpQuery.get(s"$url${DummyCreator.STUB_CONFIGURATION}")
+    val (code: Int, json: JValue) = httpQuery.get(s"$url${DummyCreator.DUMMY_CONFIGURATION}")
 
     // then
     assert(code === 200)
