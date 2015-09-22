@@ -47,7 +47,8 @@ class StubServlet(creator: Creator, db: DB) extends HttpServlet {
           val json: JValue = parse(request.getInputStream)
           implicit val formats = DefaultFormats
           val configuration = json.extract[Configuration]
-          service.update(name, configuration)
+//          service.update(name, configuration)
+          "ok" -> "test"
         }
       } else {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST)

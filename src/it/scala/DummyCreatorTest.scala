@@ -12,6 +12,7 @@ import org.json4s.JsonDSL._
  */
 class DummyCreatorTest extends FunSuite with HttpQuery {
 
+  val PORT = 8090
   test("multiple required values") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
@@ -65,7 +66,7 @@ class DummyCreatorTest extends FunSuite with HttpQuery {
         |]
       """
         .stripMargin).extract[List[Path]]
-    val workingServer: StubServer = DummyCreator.createWorkingServer("test", "any", api)
+    val workingServer: StubServer = DummyCreator.createWorkingServer(PORT, "any", api)
     workingServer.start
     val port = workingServer.portInUse
     val url = s"http://localhost:$port"
@@ -139,7 +140,7 @@ class DummyCreatorTest extends FunSuite with HttpQuery {
         |]
       """
         .stripMargin).extract[List[Path]]
-    val workingServer: StubServer = DummyCreator.createWorkingServer("test", "any", api)
+    val workingServer: StubServer = DummyCreator.createWorkingServer(PORT, "any", api)
     workingServer.start
     val port = workingServer.portInUse
     val url = s"http://localhost:$port"
@@ -193,7 +194,7 @@ class DummyCreatorTest extends FunSuite with HttpQuery {
         |]
       """
         .stripMargin).extract[List[Path]]
-    val workingServer: StubServer = DummyCreator.createWorkingServer("test", "any", api)
+    val workingServer: StubServer = DummyCreator.createWorkingServer(PORT, "any", api)
     workingServer.start
     val port = workingServer.portInUse
     val url = s"http://localhost:$port"
@@ -246,7 +247,7 @@ class DummyCreatorTest extends FunSuite with HttpQuery {
         |]
       """
         .stripMargin).extract[List[Path]]
-    val workingServer: StubServer = DummyCreator.createWorkingServer("test", "any", api)
+    val workingServer: StubServer = DummyCreator.createWorkingServer(PORT, "any", api)
     workingServer.start
     val port = workingServer.portInUse
     val url = s"http://localhost:$port"
@@ -318,7 +319,7 @@ class DummyCreatorTest extends FunSuite with HttpQuery {
         |]
       """
         .stripMargin).extract[List[Path]]
-    val workingServer: StubServer = DummyCreator.createWorkingServer("test", "any", api)
+    val workingServer: StubServer = DummyCreator.createWorkingServer(PORT, "any", api)
     workingServer.start
     val port = workingServer.portInUse
     val url = s"http://localhost:$port"
@@ -390,7 +391,7 @@ class DummyCreatorTest extends FunSuite with HttpQuery {
         |]
       """
         .stripMargin).extract[List[Path]]
-    val workingServer: StubServer = DummyCreator.createWorkingServer("test", "any", api)
+    val workingServer: StubServer = DummyCreator.createWorkingServer(PORT, "any", api)
     workingServer.start
     val port = workingServer.portInUse
     val url = s"http://localhost:$port"

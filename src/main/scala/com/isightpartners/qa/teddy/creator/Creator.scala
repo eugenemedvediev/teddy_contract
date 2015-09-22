@@ -58,15 +58,14 @@ trait Creator {
     parse(scala.io.Source.fromInputStream(getClass.getClassLoader.getResource(name).openStream()).getLines().mkString)
   }
 
-  def createWorkingServer(name: String, description: String, api: List[Path]) = new StubServer(8090, (createStubConfigurationServerRoute(name, description, api) :: createServerRoutes(api)).toArray: _*).defaultResponse(APPLICATION_JSON, """{"contract_error":"not supported path or method by contract; check configuration GET %s"}""".format(DUMMY_CONFIGURATION), 404)
+  def createWorkingServer(port: Int = 8090, description: String, api: List[Path]) = new StubServer(port, (createStubConfigurationServerRoute(description, api) :: createServerRoutes(api)).toArray: _*).defaultResponse(APPLICATION_JSON, """{"contract_error":"not supported path or method by contract; check configuration GET %s"}""".format(DUMMY_CONFIGURATION), 404)
 
-  def createStubConfigurationServerRoute(name: String, description: String, api: List[Path]): ServerRoute = {
+  def createStubConfigurationServerRoute(description: String, api: List[Path]): ServerRoute = {
     GET(
       path = DUMMY_CONFIGURATION,
       response = DynamicServerResponse({ request =>
         implicit val formats = DefaultFormats
         val server: String = compact(
-          ("name" -> name) ~
             ("description" -> description) ~
             ("api" -> parse(Serialization.write(api)))
         )

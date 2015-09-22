@@ -60,7 +60,7 @@ class ServiceIntegrationTest extends FunSuite with DummyPayload {
 
     // when
     val configurationUpdate: Configuration = parse(DUMMY_FULL_CONFIGURATION).extract[Configuration]
-    service.update(createServer.name, configurationUpdate)
+//    service.update(createServer.name, configurationUpdate)
 
     // then
     val server: Server = service.status(createServer.name).extract[Server]

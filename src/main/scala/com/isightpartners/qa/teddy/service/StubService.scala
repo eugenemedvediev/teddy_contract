@@ -2,15 +2,12 @@ package com.isightpartners.qa.teddy.service
 
 import com.isightpartners.qa.teddy._
 import com.isightpartners.qa.teddy.creator.Creator
-import com.isightpartners.qa.teddy.db.{DB, ESDB}
-import com.isightpartners.qa.teddy.model.{Configuration, Path}
-import com.typesafe.config.ConfigFactory
+import com.isightpartners.qa.teddy.db.DB
+import com.isightpartners.qa.teddy.model.Configuration
 import fr.simply.StubServer
 import org.json4s.Extraction
 import org.json4s.JsonAST.JValue
 import org.json4s.JsonDSL._
-import org.json4s.jackson.JsonMethods._
-import org.json4s.jackson.Serialization
 
 import scala.collection.mutable
 
@@ -26,7 +23,7 @@ class StubService(creator: Creator, db: DB) extends Service with HttpQuery with 
     if (freeNames.nonEmpty) {
       val name = freeNames.head
       load(name, configuration)
-      db.writeConfiguration(name, configuration)
+//      db.writeConfiguration(name, configuration)
       status(name)
     } else "message" -> "reached limit of servers"
   }
@@ -45,7 +42,7 @@ class StubService(creator: Creator, db: DB) extends Service with HttpQuery with 
     val workingServer: StubServer = servers.get(name).get
     workingServer.stop
     load(name, configuration)
-    db.writeConfiguration(name, configuration)
+//    db.writeConfiguration(name, configuration)
     status(name)
   }
 
@@ -55,7 +52,7 @@ class StubService(creator: Creator, db: DB) extends Service with HttpQuery with 
   }
 
   def load(name: String, configuration: Configuration): Option[StubServer] = {
-    val workingServer = creator.createWorkingServer(name, configuration.description, configuration.api)
+    val workingServer = creator.createWorkingServer(8090, configuration.description, configuration.api)
     workingServer.start
     servers.put(name, workingServer)
   }
@@ -70,7 +67,7 @@ class StubService(creator: Creator, db: DB) extends Service with HttpQuery with 
   }
 
   def prepareServers(): mutable.Map[String, StubServer] = {
-    val configurations: List[(String, Configuration)] = db.getAllStartedConfigurations
+    val configurations: List[(String, Configuration)] = List[(String, Configuration)]()//db.getAllStartedConfigurations
     val result = {
       if (configurations.isEmpty) {
         loadDefaultConfiguration
@@ -85,7 +82,7 @@ class StubService(creator: Creator, db: DB) extends Service with HttpQuery with 
   def loadConfigurations(configurations: List[(String, Configuration)]): mutable.Map[String, StubServer] = {
     implicit lazy val formats = org.json4s.DefaultFormats
     configurations.foldLeft(mutable.Map[String, StubServer]())((map, elem) => {
-      map.put(elem._1, creator.createWorkingServer(elem._1, elem._2.description, elem._2.api))
+      map.put(elem._1, creator.createWorkingServer(8090, elem._2.description, elem._2.api))
       map
     })
   }

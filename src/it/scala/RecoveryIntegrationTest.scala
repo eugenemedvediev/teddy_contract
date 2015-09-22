@@ -5,7 +5,6 @@ import com.isightpartners.qa.teddy.creator.DummyCreator
 import com.isightpartners.qa.teddy.db.ESDB
 import com.isightpartners.qa.teddy.service.StubService
 import com.isightpartners.qa.teddy.model.{Configuration, Server}
-import org.apache.commons.io.FileUtils
 import org.json4s.JsonAST.JValue
 import org.json4s.jackson.JsonMethods._
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
@@ -32,7 +31,7 @@ class RecoveryIntegrationTest extends FunSuite with DummyPayload with BeforeAndA
 
   override protected def afterAll() = {
     try {
-      FileUtils.forceDelete(elasticData)
+
     } catch {
       case e: Exception => println("exception during deleting: " + elasticData)
     }
