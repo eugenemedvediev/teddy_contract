@@ -1,10 +1,10 @@
 package qa.common
 
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
+import org.simpleframework.http.Request
 import qa.common.model.Configuration
 
-/**
- * Created by ievgen on 22/09/15.
- */
 object Util {
 
   def getStringifiedRoutes(configuration: Configuration): List[String] = {
@@ -13,5 +13,24 @@ object Util {
     val strings = sortedByPath.map(p => s"""${p._1} - ${p._2.mkString(", ")}""")
     strings
   }
+
+  def jsonFromFile(name: String): JValue = {
+    parse(scala.io.Source.fromFile(name).getLines().mkString)
+  }
+
+  def getRequestHeaders(request: Request): Map[String, String] = {
+    val tuples: List[(String, String)] = for {
+      name <- request.getNames.toArray.toList
+    } yield (name.toString, request.getValue(name.toString))
+    tuples.toMap
+  }
+
+  def extractConfiguration(file: String): Configuration = {
+    val json: JValue = jsonFromFile(file)
+    implicit val formats = DefaultFormats
+    val configuration = json.extract[Configuration]
+    configuration
+  }
+
 
 }

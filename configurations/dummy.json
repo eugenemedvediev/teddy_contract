@@ -30,21 +30,13 @@
               "Content-Type": "application/json",
               "Accept": "application/json"
             },
-            "body": {
-              "server": "Angel",
-              "description": "Angel Server Description"
-            }
+            "body": null
           },
           "response": {
             "headers": {
               "Content-Type": "application/json"
             },
-            "body": {
-              "id": 1,
-              "server": "Angel",
-              "description": "Angel Server Description",
-              "port": 8090
-            },
+            "body": "yoohoo",
             "code": 200
           }
         },
