@@ -15,6 +15,6 @@ case class Route(method: String, path: String, scenarios: List[Scenario] = List[
 
 case class Scenario(name: String, request: ScenarioRequest, response: ScenarioResponse)
 
-case class ScenarioRequest(headers: Map[String, String] = Map(), body: Object)
+case class ScenarioRequest(headers: Map[String, String] = Map(), body: Object = null)
 
-case class ScenarioResponse(headers: Map[String, String] = Map(), body: Object, code: Int)
+case class ScenarioResponse(headers: Map[String, String] = Map(), body: Object = null, code: Int)

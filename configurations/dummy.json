@@ -10,8 +10,7 @@
           "request": {
             "headers": {
               "!Authorization": null
-            },
-            "body": null
+            }
           },
           "response": {
             "headers": {
@@ -30,13 +29,16 @@
               "Content-Type": "application/json",
               "Accept": "application/json"
             },
-            "body": null
+            "body": {
+              "server": "name",
+              "description": "Angel Server Description"
+            }
           },
           "response": {
             "headers": {
               "Content-Type": "application/json"
             },
-            "body": "yoohoo",
+            "body": "@/Users/ievgen/github/teddy_contract/configurations/scenario.json",
             "code": 200
           }
         },

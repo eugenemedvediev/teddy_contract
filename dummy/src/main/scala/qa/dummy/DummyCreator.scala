@@ -104,18 +104,37 @@ object DummyCreator {
       val contentType: String = scenario.response.headers.getOrElse(CONTENT_TYPE_HEADER, APPLICATION_JSON)
       var body = scenario.response.body.toString
       if (contentType.equals(APPLICATION_JSON)) {
-        body = parseBody(parse(Serialization.write(scenario.response.body)))
+        try {
+          body = parseBody(parse(Serialization.write(scenario.response.body)))
+          StaticServerResponse(ContentType(contentType), body, scenario.response.code, scenario.response.headers)
+        } catch {
+          case ex: Throwable =>
+            StaticServerResponse(APPLICATION_JSON_CONTENT_TYPE, ContractError.CONTRACT_ERROR.format(ex.getMessage), 503, Map("dummy_scenario" -> scenario.name))
+        }
+      } else {
+        StaticServerResponse(ContentType(contentType), body, scenario.response.code, scenario.response.headers)
       }
-      StaticServerResponse(ContentType(contentType), body, scenario.response.code, scenario.response.headers)
     }
 
-    def exceptionalResponse(scenariosWithoutRequiredHeaders: List[Scenario], scenariosWithSpecifiedHeaders: List[Scenario], requestHeaders: Map[String, String]): StaticServerResponse = {
-      if (scenariosWithoutRequiredHeaders.nonEmpty)
-        withoutRequiredHeaderResponse(scenariosWithoutRequiredHeaders, requestHeaders)
+    def exceptionalResponse(scenariosWithMissingRequiredHeaders: List[Scenario], scenariosWithSpecifiedHeaders: List[Scenario], requestHeaders: Map[String, String]): StaticServerResponse = {
+      if (scenariosWithMissingRequiredHeaders.nonEmpty)
+        withoutRequiredHeaderResponse(scenariosWithMissingRequiredHeaders, requestHeaders)
       else if (scenariosWithSpecifiedHeaders.isEmpty)
         StaticServerResponse(APPLICATION_JSON_CONTENT_TYPE, ContractError.NO_SCENARIO_WITH_HEADER, 503)
       else
         StaticServerResponse(APPLICATION_JSON_CONTENT_TYPE, ContractError.NO_SCENARIO_WITH_BODY, 503)
+    }
+
+    def withoutRequiredHeaderResponse(scenariosWithoutRequiredHeaders: List[Scenario], requestHeaders: Map[String, String]): StaticServerResponse = {
+      implicit lazy val formats = org.json4s.DefaultFormats
+      val scenario = scenariosWithoutRequiredHeaders.head
+      val response = scenario.response
+      val requiredHeader: (String, String) = scenario.request.headers.filter(h => !requestHeaders.contains(h._1.substring(1)) || (h._2 != null && requestHeaders.getOrElse(h._1.substring(1), null) != h._2)).head
+      //TODO write test and simplify
+      var serializedBody: String = Serialization.write(response.body)
+      if (serializedBody.contains(EXPECTED_HEADER))
+        serializedBody = serializedBody.replaceAll(EXPECTED_HEADER, requiredHeader._1.substring(1))
+      StaticServerResponse(fr.simply.util.ContentType(response.headers.getOrElse(CONTENT_TYPE_HEADER, APPLICATION_JSON)), serializedBody, response.code, Map("dummy_scenario" -> scenario.name))
     }
 
     if (route.scenarios == null) {
@@ -127,11 +146,11 @@ object DummyCreator {
         Map(),
         DynamicServerResponse({ request =>
           val requestHeaders: Map[String, String] = Util.getRequestHeaders(request)
-          val scenariosWithoutRequiredHeaders = getScenariosWithoutRequiredHeaders(route.scenarios, requestHeaders)
+          val scenariosWithMissingRequiredHeaders = getScenariosWithMissingRequiredHeaders(route.scenarios, requestHeaders)
           val scenariosWithSpecifiedHeaders = getScenariosWithSpecifiedHeaders(route.scenarios, requestHeaders)
 
           val content = request.getContent
-          val hasRequiredHeaders: Boolean = scenariosWithoutRequiredHeaders.isEmpty
+          val hasRequiredHeaders: Boolean = scenariosWithMissingRequiredHeaders.isEmpty
           val hasSpecifiedHeaders: Boolean = scenariosWithSpecifiedHeaders.nonEmpty
           val hasBodyMatch: Boolean = scenariosWithSpecifiedHeaders.exists(bodyCondition(content))
 
@@ -139,7 +158,7 @@ object DummyCreator {
             val scenario: Scenario = scenariosWithSpecifiedHeaders.filter(bodyCondition(content)).head
             expectedResponse(request, scenario)
           } else {
-            exceptionalResponse(scenariosWithoutRequiredHeaders, scenariosWithSpecifiedHeaders, requestHeaders)
+            exceptionalResponse(scenariosWithMissingRequiredHeaders, scenariosWithSpecifiedHeaders, requestHeaders)
           }
         })
       )
@@ -147,7 +166,7 @@ object DummyCreator {
   }
 
   def getScenariosWithSpecifiedHeaders(scenarios: List[Scenario], headers: Map[String, String]): List[Scenario] = {
-    if (scenarios == null || scenarios.isEmpty){
+    if (scenarios == null || scenarios.isEmpty) {
       List[Scenario]()
     } else if (headers == null || headers.isEmpty) {
       scenarios.filter(scenario =>
@@ -162,25 +181,29 @@ object DummyCreator {
     }
   }
 
-  def getScenariosWithoutRequiredHeaders(scenarios: List[Scenario], headers: Map[String, String]): List[Scenario] = {
-    val withRequiredHeaders: List[Scenario] = scenarios.filter(scenario =>
-      scenario.request.headers.exists(h => h._1.startsWith("!"))
-    )
-    if (headers.isEmpty)
-      withRequiredHeaders
-    else
-      withRequiredHeaders.filter(scenario =>
-        scenario.request.headers.exists(h => {
-          val key: String = h._1.substring(1)
-          !headers.contains(key) || (h._2 != null && headers.getOrElse(key, null) != h._2)
-        }
-        )
+  def getScenariosWithMissingRequiredHeaders(scenarios: List[Scenario], headers: Map[String, String]): List[Scenario] = {
+    if (scenarios == null || scenarios.isEmpty)
+      List[Scenario]()
+    else {
+      val withRequiredHeaders: List[Scenario] = scenarios.filter(scenario =>
+        scenario.request.headers.exists(h => h._1.startsWith("!"))
       )
+      if (headers == null || headers.isEmpty)
+        withRequiredHeaders
+      else
+        withRequiredHeaders.filter(scenario =>
+          scenario.request.headers.exists(h => {
+            val key: String = h._1.substring(1)
+            !headers.contains(key) || (h._2 != null && headers.getOrElse(key, null) != h._2)
+          })
+        )
+    }
 
   }
 
   def parseBody(body: JsonAST.JValue): String = {
     implicit lazy val formats = org.json4s.DefaultFormats
+    if (body == null) return null
     body match {
       case _: JArray => compact(body)
       case _: JObject => compact(body)
@@ -188,9 +211,9 @@ object DummyCreator {
         value match {
           case string if string.extract[String].startsWith("@") => {
             try {
-              compact(Util.jsonFromFile(body.extract[String].substring(1)))
+              compact(Util.jsonFromFile(string.extract[String].substring(1)))
             } catch {
-              case _: Throwable => throw new scala.IllegalArgumentException(s"Can't load body from file: $body")
+              case _: Throwable => throw new scala.IllegalArgumentException(s"Can't load body from file: ${string.extract[String].substring(1)}")
             }
           }
           case _ => compact(value)
@@ -198,18 +221,6 @@ object DummyCreator {
       }
       case _ => throw new scala.IllegalArgumentException(s"Not supported body: $body")
     }
-  }
-
-  def withoutRequiredHeaderResponse(scenariosWithoutRequiredHeaders: List[Scenario], requestHeaders: Map[String, String]): StaticServerResponse = {
-    implicit lazy val formats = org.json4s.DefaultFormats
-    val scenario = scenariosWithoutRequiredHeaders.head
-    val response = scenario.response
-    val requiredHeader: (String, String) = scenario.request.headers.filter(h => !requestHeaders.contains(h._1.substring(1)) || (h._2 != null && requestHeaders.getOrElse(h._1.substring(1), null) != h._2)).head
-    //TODO write test and simplify
-    var serializedBody: String = Serialization.write(response.body)
-    if (serializedBody.contains(EXPECTED_HEADER))
-      serializedBody = serializedBody.replaceAll(EXPECTED_HEADER, requiredHeader._1.substring(1))
-    StaticServerResponse(fr.simply.util.ContentType(response.headers.getOrElse(CONTENT_TYPE_HEADER, APPLICATION_JSON)), serializedBody, response.code, Map("dummy_scenario" -> scenario.name))
   }
 
   def bodyCondition(content: String): (Scenario) => Boolean = { scenario =>
