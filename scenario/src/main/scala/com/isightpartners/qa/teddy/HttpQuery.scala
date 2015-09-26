@@ -7,8 +7,7 @@ package com.isightpartners.qa.teddy
 import java.io.InputStream
 
 import com.isightpartners.qa.teddy.model.{Path, Server}
-import org.apache.http.HttpEntity
-import org.apache.http.client.methods.{HttpPost, CloseableHttpResponse, HttpGet, HttpRequestBase}
+import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet, HttpPost, HttpRequestBase}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
 import org.json4s._

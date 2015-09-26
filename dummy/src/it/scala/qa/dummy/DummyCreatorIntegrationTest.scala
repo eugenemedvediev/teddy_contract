@@ -1,22 +1,26 @@
-import com.isightpartners.qa.teddy.HttpQuery
-import com.isightpartners.qa.teddy.creator.DummyCreator
-import com.isightpartners.qa.teddy.model.{ScenarioResponse, ScenarioRequest, Scenario, Path}
+package qa.dummy
+
+import java.net.URL
+
 import fr.simply.StubServer
-import org.json4s.JsonAST.JValue
 import org.json4s.jackson.JsonMethods._
 import org.scalatest.FunSuite
-import org.json4s.JsonDSL._
+import qa.common.model.{Configuration, Route}
+import uk.co.bigbeeconsultants.http.HttpClient
+import uk.co.bigbeeconsultants.http.header.{Headers, MediaType}
+import uk.co.bigbeeconsultants.http.request.RequestBody
+
 
 /**
- * Created by ievgen on 09/09/15.
+ * Created by ievgen on 24/09/15.
  */
-class DummyCreatorTest extends FunSuite with HttpQuery {
+class DummyCreatorIntegrationTest extends FunSuite {
+  val DEFAULT_PORT = 8090
 
-  val PORT = 8090
   test("multiple required values") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
-    val api: List[Path] = parse(
+    val api: List[Route] = parse(
       """
         |[
         |    {
@@ -65,32 +69,35 @@ class DummyCreatorTest extends FunSuite with HttpQuery {
         |    }
         |]
       """
-        .stripMargin).extract[List[Path]]
-    val workingServer: StubServer = DummyCreator.createWorkingServer(PORT, "any", api)
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
     val port = workingServer.portInUse
     val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
 
     // when
-    val (code: Int, json: JValue) = post(
-      s"$url/test/header",
-      Map(
+    val response = httpClient.post(
+      new URL(s"$url/test/header"),
+      Some(requestBody),
+      Headers(Map(
         "Authorization" -> "Token 123",
         "Content-Type" -> "application/json",
         "Accept" -> "application/json"
-      ),
-      null
+      ))
     )
 
     // then
-    assert(code == 200)
-    assert((json \\ "message").extract[String] == "match header")
+    assert(response.status.code == 200)
+    assert(response.body.isTextual == true)
+    assert((parse(response.body.asString) \\ "message").extract[String] == "match header")
   }
 
   test("missing header from multiple required values") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
-    val api: List[Path] = parse(
+    val api: List[Route] = parse(
       """
         |[
         |    {
@@ -139,31 +146,33 @@ class DummyCreatorTest extends FunSuite with HttpQuery {
         |    }
         |]
       """
-        .stripMargin).extract[List[Path]]
-    val workingServer: StubServer = DummyCreator.createWorkingServer(PORT, "any", api)
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
     val port = workingServer.portInUse
     val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
 
     // when
-    val (code: Int, json: JValue) = post(
-      s"$url/test/header",
-      Map(
+    val response = httpClient.post(
+      new URL(s"$url/test/header"),
+      Some(requestBody),
+      Headers(Map(
         "Authorization" -> "Token 123",
         "Content-Type" -> "application/json"
-      ),
-      null
+      ))
     )
 
     // then
-    assert(code == 400)
-    assert((json \\ "error").extract[String] == "Not valid Accept header")
+    assert(response.status.code == 400)
+    assert((parse(response.body.asString) \\ "error").extract[String] == "Not valid Accept header")
   }
 
   test("missing header") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
-    val api: List[Path] = parse(
+    val api: List[Route] = parse(
       """
         |[
         |    {
@@ -193,30 +202,32 @@ class DummyCreatorTest extends FunSuite with HttpQuery {
         |    }
         |]
       """
-        .stripMargin).extract[List[Path]]
-    val workingServer: StubServer = DummyCreator.createWorkingServer(PORT, "any", api)
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
     val port = workingServer.portInUse
     val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("{}", MediaType.APPLICATION_JSON)
 
     // when
-    val (code: Int, json: JValue) = post(
-      s"$url/test/header",
-      Map(
+    val response = httpClient.post(
+      new URL(s"$url/test/header"),
+      Some(requestBody),
+      Headers(Map(
         "Accept" -> "application/json"
-      ),
-      parse("{}")
+      ))
     )
 
     // then
-    assert(code == 400)
-    assert((json \\ "error").extract[String] == "Authorization header is missing")
+    assert(response.status.code == 400)
+    assert((parse(response.body.asString) \\ "error").extract[String] == "Authorization header is missing")
   }
 
   test("header with not expected value") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
-    val api: List[Path] = parse(
+    val api: List[Route] = parse(
       """
         |[
         |    {
@@ -246,30 +257,32 @@ class DummyCreatorTest extends FunSuite with HttpQuery {
         |    }
         |]
       """
-        .stripMargin).extract[List[Path]]
-    val workingServer: StubServer = DummyCreator.createWorkingServer(PORT, "any", api)
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
     val port = workingServer.portInUse
     val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("{}", MediaType.APPLICATION_JSON)
 
     // when
-    val (code: Int, json: JValue) = post(
-      s"$url/test/header",
-      Map(
+    val response = httpClient.post(
+      new URL(s"$url/test/header"),
+      Some(requestBody),
+      Headers(Map(
         "Authorization" -> "Token not123"
-      ),
-      parse("{}")
+      ))
     )
 
     // then
-    assert(code == 400)
-    assert((json \\ "error").extract[String] == "Incorrect token")
+    assert(response.status.code == 400)
+    assert((parse(response.body.asString) \\ "error").extract[String] == "Incorrect token")
   }
 
   test("correct required header with value") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
-    val api: List[Path] = parse(
+    val api: List[Route] = parse(
       """
         |[
         |    {
@@ -318,30 +331,32 @@ class DummyCreatorTest extends FunSuite with HttpQuery {
         |    }
         |]
       """
-        .stripMargin).extract[List[Path]]
-    val workingServer: StubServer = DummyCreator.createWorkingServer(PORT, "any", api)
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
     val port = workingServer.portInUse
     val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
 
     // when
-    val (code: Int, json: JValue) = post(
-      s"$url/test/header",
-      Map(
+    val response = httpClient.post(
+      new URL(s"$url/test/header"),
+      Some(requestBody),
+      Headers(Map(
         "Authorization" -> "Token 123"
-      ),
-      null
+      ))
     )
 
     // then
-    assert(code == 200)
-    assert((json \\ "message").extract[String] == "match header")
+    assert(response.status.code == 200)
+    assert((parse(response.body.asString) \\ "message").extract[String] == "match header")
   }
 
   test("correct required header without value") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
-    val api: List[Path] = parse(
+    val api: List[Route] = parse(
       """
         |[
         |    {
@@ -390,24 +405,27 @@ class DummyCreatorTest extends FunSuite with HttpQuery {
         |    }
         |]
       """
-        .stripMargin).extract[List[Path]]
-    val workingServer: StubServer = DummyCreator.createWorkingServer(PORT, "any", api)
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
     val port = workingServer.portInUse
     val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
 
     // when
-    val (code: Int, json: JValue) = post(
-      s"$url/test/header",
-      Map(
+    val response = httpClient.post(
+      new URL(s"$url/test/header"),
+      Some(requestBody),
+      Headers(Map(
         "Authorization" -> "Token 123"
-      ),
-      null
+      ))
     )
 
     // then
-    assert(code == 200)
-    assert((json \\ "message").extract[String] == "match header")
+    assert(response.status.code == 200)
+    assert((parse(response.body.asString) \\ "message").extract[String] == "match header")
   }
+
 
 }
