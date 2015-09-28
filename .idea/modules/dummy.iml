@@ -26,7 +26,6 @@
       <excludeFolder url="file://$MODULE_DIR$/../../dummy/target/one-jar-redist" />
       <excludeFolder url="file://$MODULE_DIR$/../../dummy/target/resolution-cache" />
       <excludeFolder url="file://$MODULE_DIR$/../../dummy/target/streams" />
-      <excludeFolder url="file://$MODULE_DIR$/../../dummy/target/test-reports" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -34,10 +33,8 @@
     <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-annotations:2.3.0:jar" level="project" />
     <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-core:2.3.1:jar" level="project" />
     <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-databind:2.3.1:jar" level="project" />
-    <orderEntry type="library" name="SBT: com.github.kxbmap:configs_2.10:0.2.2:jar" level="project" />
     <orderEntry type="library" name="SBT: com.github.simplyscala:simplyscala-server_2.10:0.5:jar" level="project" />
     <orderEntry type="library" name="SBT: com.thoughtworks.paranamer:paranamer:2.6:jar" level="project" />
-    <orderEntry type="library" name="SBT: com.typesafe:config:1.2.1:jar" level="project" />
     <orderEntry type="library" name="SBT: org.json4s:json4s-ast_2.10:3.2.11:jar" level="project" />
     <orderEntry type="library" name="SBT: org.json4s:json4s-core_2.10:3.2.11:jar" level="project" />
     <orderEntry type="library" name="SBT: org.json4s:json4s-jackson_2.10:3.2.11:jar" level="project" />
@@ -45,10 +42,6 @@
     <orderEntry type="library" name="SBT: org.scala-lang:scalap:2.10.0:jar" level="project" />
     <orderEntry type="library" name="SBT: org.simpleframework:simple:5.1.5:jar" level="project" />
     <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.10.5:jar" level="project" />
-    <orderEntry type="library" name="SBT: commons-codec:commons-codec:1.6:jar" level="project" />
-    <orderEntry type="library" name="SBT: commons-logging:commons-logging:1.1.3:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.apache.httpcomponents:httpclient:4.3.6:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.apache.httpcomponents:httpcore:4.3.3:jar" level="project" />
     <orderEntry type="library" name="SBT: antlr:antlr:2.7.7:jar" level="project" />
     <orderEntry type="library" name="SBT: com.pyruby:java-stub-server:0.12:jar" level="project" />
     <orderEntry type="library" name="SBT: com.sdicons.jsontools:jsontools-core:1.7:jar" level="project" />

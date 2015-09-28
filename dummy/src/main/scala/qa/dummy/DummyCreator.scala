@@ -11,7 +11,9 @@ import fr.simply.util._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
+import org.simpleframework.http.Request
 import qa.common.Util
+import qa.common.exception.{ContractException, ConfigurationException}
 import qa.common.http.Methods
 import qa.common.model.{Configuration, Route, Scenario}
 
@@ -27,9 +29,24 @@ object DummyCreator {
   val TEXT_PLAIN_CONTENT_TYPE = fr.simply.util.Text_Plain
   val EXPECTED_HEADER = "@expectedHeader"
 
+  @throws(classOf[ConfigurationException])
   def createServer(port: Int, configuration: Configuration) = {
+    configuration.api.foreach(validateRoute)
     val routes: List[ServerRoute] = createConfigurationRoute(configuration) :: createServerRoutes(configuration.api)
-    new StubServer(port, routes.toArray: _*).defaultResponse(APPLICATION_JSON_CONTENT_TYPE, ContractError.NOT_SUPPORTED_PATH, 503)
+    new StubServer(port, routes.toArray: _*).defaultResponse(APPLICATION_JSON_CONTENT_TYPE, ContractError.NOT_SUPPORTED_PATH_ERROR, 503)
+  }
+
+  @throws(classOf[ConfigurationException])
+  def validateRoute(route: Route): Unit = {
+    if (route.path.isEmpty || !route.path.startsWith("/")) {
+      throw new ConfigurationException( s"""Not valid path: "${route.path}"""")
+    }
+    if (route.method.isEmpty || !Methods.methods.keySet.contains(route.method)) {
+      throw new ConfigurationException( s"""Not valid method "${route.method}" in path: "${route.path}"""")
+    }
+    if (route.scenarios.isEmpty) {
+      throw new ConfigurationException(s"Empty scenarios for route: ${route.method} ${route.path}")
+    }
   }
 
   def createConfigurationRoute(configuration: Configuration): ServerRoute = {
@@ -89,6 +106,7 @@ object DummyCreator {
 
   }
 
+  @throws(classOf[ConfigurationException])
   def createServerRoutes(list: List[Route]) = {
     def loop(list: List[Route], acc: List[ServerRoute]): List[ServerRoute] = list match {
       case Nil => acc
@@ -99,76 +117,82 @@ object DummyCreator {
 
   def createServerRoute(route: Route): ServerRoute = {
 
-    def expectedResponse(request: org.simpleframework.http.Request, scenario: Scenario): StaticServerResponse = {
+    def expectedResponse(request: Request, scenario: Scenario): StaticServerResponse = {
       implicit lazy val formats = org.json4s.DefaultFormats
       val contentType: String = scenario.response.headers.getOrElse(CONTENT_TYPE_HEADER, APPLICATION_JSON)
-      var body = scenario.response.body.toString
-      if (contentType.equals(APPLICATION_JSON)) {
-        try {
-          body = parseBody(parse(Serialization.write(scenario.response.body)))
-          StaticServerResponse(ContentType(contentType), body, scenario.response.code, scenario.response.headers)
-        } catch {
-          case ex: Throwable =>
-            StaticServerResponse(APPLICATION_JSON_CONTENT_TYPE, ContractError.CONTRACT_ERROR.format(ex.getMessage), 503, Map("dummy_scenario" -> scenario.name))
-        }
-      } else {
-        StaticServerResponse(ContentType(contentType), body, scenario.response.code, scenario.response.headers)
-      }
+      val body =
+        if (contentType.equals(APPLICATION_JSON))
+          parseBody(parse(Serialization.write(scenario.response.body)))
+        else
+          scenario.response.body.toString
+      StaticServerResponse(ContentType(contentType), body, scenario.response.code, scenario.response.headers)
     }
 
-    def exceptionalResponse(scenariosWithMissingRequiredHeaders: List[Scenario], scenariosWithSpecifiedHeaders: List[Scenario], requestHeaders: Map[String, String]): StaticServerResponse = {
-      if (scenariosWithMissingRequiredHeaders.nonEmpty)
-        withoutRequiredHeaderResponse(scenariosWithMissingRequiredHeaders, requestHeaders)
-      else if (scenariosWithSpecifiedHeaders.isEmpty)
-        StaticServerResponse(APPLICATION_JSON_CONTENT_TYPE, ContractError.NO_SCENARIO_WITH_HEADER, 503)
-      else
-        StaticServerResponse(APPLICATION_JSON_CONTENT_TYPE, ContractError.NO_SCENARIO_WITH_BODY, 503)
-    }
-
-    def withoutRequiredHeaderResponse(scenariosWithoutRequiredHeaders: List[Scenario], requestHeaders: Map[String, String]): StaticServerResponse = {
+    def requiredResponse(scenario: Scenario, headers: Map[String, String]): StaticServerResponse = {
       implicit lazy val formats = org.json4s.DefaultFormats
-      val scenario = scenariosWithoutRequiredHeaders.head
       val response = scenario.response
-      val requiredHeader: (String, String) = scenario.request.headers.filter(h => !requestHeaders.contains(h._1.substring(1)) || (h._2 != null && requestHeaders.getOrElse(h._1.substring(1), null) != h._2)).head
-      //TODO write test and simplify
+      val requiredHeader: (String, String) = scenario.request.headers.filter(h => !headers.contains(h._1.substring(1)) || (h._2 != null && headers.getOrElse(h._1.substring(1), null) != h._2)).head
       var serializedBody: String = Serialization.write(response.body)
       if (serializedBody.contains(EXPECTED_HEADER))
         serializedBody = serializedBody.replaceAll(EXPECTED_HEADER, requiredHeader._1.substring(1))
-      StaticServerResponse(fr.simply.util.ContentType(response.headers.getOrElse(CONTENT_TYPE_HEADER, APPLICATION_JSON)), serializedBody, response.code, Map("dummy_scenario" -> scenario.name))
+      StaticServerResponse(ContentType(response.headers.getOrElse(CONTENT_TYPE_HEADER, APPLICATION_JSON)), serializedBody, response.code, Map("dummy_scenario" -> scenario.name))
     }
 
-    if (route.scenarios == null) {
-      throw new IllegalStateException("missing scenarios")
-    }
-    else {
-      Methods.get(route.method)(
-        route.path,
-        Map(),
-        DynamicServerResponse({ request =>
-          val requestHeaders: Map[String, String] = Util.getRequestHeaders(request)
-          val scenariosWithMissingRequiredHeaders = getScenariosWithMissingRequiredHeaders(route.scenarios, requestHeaders)
-          val scenariosWithSpecifiedHeaders = getScenariosWithSpecifiedHeaders(route.scenarios, requestHeaders)
-
+    Methods.get(route.method)(
+      route.path,
+      Map(),
+      DynamicServerResponse({ request =>
+        try {
+          val headers: Map[String, String] = Util.getRequestHeaders(request)
           val content = request.getContent
-          val hasRequiredHeaders: Boolean = scenariosWithMissingRequiredHeaders.isEmpty
-          val hasSpecifiedHeaders: Boolean = scenariosWithSpecifiedHeaders.nonEmpty
-          val hasBodyMatch: Boolean = scenariosWithSpecifiedHeaders.exists(bodyCondition(content))
-
-          if (hasRequiredHeaders && hasSpecifiedHeaders && hasBodyMatch) {
-            val scenario: Scenario = scenariosWithSpecifiedHeaders.filter(bodyCondition(content)).head
+          val requiredScenario = findRequiredScenario(route.scenarios, headers)
+          if (requiredScenario != null)
+            requiredResponse(requiredScenario, headers)
+          else {
+            val scenario = findScenario(route.scenarios, headers, content)
             expectedResponse(request, scenario)
-          } else {
-            exceptionalResponse(scenariosWithMissingRequiredHeaders, scenariosWithSpecifiedHeaders, requestHeaders)
           }
-        })
-      )
-    }
+        } catch {
+          case ex: ContractException =>
+            StaticServerResponse(APPLICATION_JSON_CONTENT_TYPE, ContractError.CONTRACT_ERROR.format(ex.getMessage), 503)
+          case t: Throwable =>
+            StaticServerResponse(APPLICATION_JSON_CONTENT_TYPE, ContractError.DUMMY_ERROR.format(t.getMessage), 503)
+        }
+      })
+    )
+
   }
 
-  def getScenariosWithSpecifiedHeaders(scenarios: List[Scenario], headers: Map[String, String]): List[Scenario] = {
-    if (scenarios == null || scenarios.isEmpty) {
-      List[Scenario]()
-    } else if (headers == null || headers.isEmpty) {
+  def findRequiredScenario(scenarios: List[Scenario], headers: Map[String, String]): Scenario = {
+    val withRequiredHeaders: List[Scenario] = scenarios.filter(scenario =>
+      scenario.request.headers.exists(h => h._1.startsWith("!"))
+    )
+    val list = if (headers == null || headers.isEmpty)
+      withRequiredHeaders
+    else
+      withRequiredHeaders.filter(scenario =>
+        scenario.request.headers.exists(h => {
+          val key: String = h._1.substring(1)
+          !headers.contains(key) || (h._2 != null && headers.getOrElse(key, null) != h._2)
+        })
+      )
+    if (list.isEmpty) null else list.head
+
+  }
+
+  @throws(classOf[ContractException])
+  def findScenario(scenarios: List[Scenario], headers: Map[String, String], content: String) = {
+    val withHeaders = filterScenariosByHeaders(scenarios, headers)
+    val withBody = filterScenariosByBody(content, withHeaders)
+    if (withBody.isEmpty) {
+      throw new ContractException("no any scenarios with specified body")
+    }
+    withBody.head
+  }
+
+  @throws(classOf[ContractException])
+  def filterScenariosByHeaders(scenarios: List[Scenario], headers: Map[String, String]): List[Scenario] = {
+    val list = if (headers == null || headers.isEmpty) {
       scenarios.filter(scenario =>
         scenario.request.headers.isEmpty
       )
@@ -179,26 +203,15 @@ object DummyCreator {
         )
       )
     }
+
+    if (list.isEmpty) {
+      throw new ContractException("no any scenarios with specified header")
+    }
+    list
   }
 
-  def getScenariosWithMissingRequiredHeaders(scenarios: List[Scenario], headers: Map[String, String]): List[Scenario] = {
-    if (scenarios == null || scenarios.isEmpty)
-      List[Scenario]()
-    else {
-      val withRequiredHeaders: List[Scenario] = scenarios.filter(scenario =>
-        scenario.request.headers.exists(h => h._1.startsWith("!"))
-      )
-      if (headers == null || headers.isEmpty)
-        withRequiredHeaders
-      else
-        withRequiredHeaders.filter(scenario =>
-          scenario.request.headers.exists(h => {
-            val key: String = h._1.substring(1)
-            !headers.contains(key) || (h._2 != null && headers.getOrElse(key, null) != h._2)
-          })
-        )
-    }
-
+  def filterScenariosByBody(content: String, scenarios: List[Scenario]): List[Scenario] = {
+    scenarios.filter(bodyCondition(content))
   }
 
   def parseBody(body: JsonAST.JValue): String = {

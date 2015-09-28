@@ -5,6 +5,7 @@ import java.net.URL
 import fr.simply.StubServer
 import org.json4s.jackson.JsonMethods._
 import org.scalatest.FunSuite
+import qa.common.exception.ConfigurationException
 import qa.common.model.{Configuration, Route}
 import uk.co.bigbeeconsultants.http.HttpClient
 import uk.co.bigbeeconsultants.http.header.{Headers, MediaType}
@@ -51,7 +52,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |          "name": "correct required header",
         |          "request": {
         |            "headers": {},
-        |            "body": null
+        |            "body": {
+        |              "input": "data"
+        |            }
         |          },
         |          "response": {
         |            "headers": {
@@ -75,7 +78,7 @@ class DummyCreatorIntegrationTest extends FunSuite {
     val port = workingServer.portInUse
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
-    val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
+    val requestBody = RequestBody("""{"input":"data"}""", MediaType.APPLICATION_JSON)
 
     // when
     val response = httpClient.post(
@@ -353,6 +356,167 @@ class DummyCreatorIntegrationTest extends FunSuite {
     assert((parse(response.body.asString) \\ "message").extract[String] == "match header")
   }
 
+  test("text/plain body") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+        |[
+        |    {
+        |      "method": "POST",
+        |      "path": "/test/header",
+        |      "scenarios": [
+        |        {
+        |          "name": "correct required header",
+        |          "request": {
+        |            "headers": {
+        |              "Authorization": "Token 123"
+        |            },
+        |            "body": null
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "text\/plain"
+        |            },
+        |            "body": "match header",
+        |            "code": 200
+        |          }
+        |        }
+        |      ]
+        |    }
+        |]
+      """
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    workingServer.start
+    val port = workingServer.portInUse
+    val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
+
+    // when
+    val response = httpClient.post(
+      new URL(s"$url/test/header"),
+      Some(requestBody),
+      Headers(Map(
+        "Authorization" -> "Token 123"
+      ))
+    )
+
+    // then
+    assert(response.status.code == 200)
+    assert(response.body.asString == "match header\n")
+  }
+
+
+  test("not match body") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+        |[
+        |    {
+        |      "method": "POST",
+        |      "path": "/test/header",
+        |      "scenarios": [
+        |        {
+        |          "name": "correct required header",
+        |          "request": {
+        |            "headers": {
+        |              "Authorization": "Token 123"
+        |            },
+        |            "body": {
+        |               "some": "body"
+        |            }
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "text\/plain"
+        |            },
+        |            "body": "match header",
+        |            "code": 200
+        |          }
+        |        }
+        |      ]
+        |    }
+        |]
+      """
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    workingServer.start
+    val port = workingServer.portInUse
+    val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("""{"notsome":"body"}""", MediaType.APPLICATION_JSON)
+
+    // when
+    val response = httpClient.post(
+      new URL(s"$url/test/header"),
+      Some(requestBody),
+      Headers(Map(
+        "Authorization" -> "Token 123"
+      ))
+    )
+
+    // then
+    assert(response.status.code == 503)
+    assert((parse(response.body.asString) \\ "contract_error").extract[String] == "no any scenarios with specified body")
+  }
+
+  test("failure read from file") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+        |[
+        |    {
+        |      "method": "POST",
+        |      "path": "/test/header",
+        |      "scenarios": [
+        |        {
+        |          "name": "correct required header",
+        |          "request": {
+        |            "headers": {
+        |              "Authorization": "Token 123"
+        |            },
+        |            "body": {
+        |               "some": "body"
+        |            }
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": "@/tmp/not_existing_file",
+        |            "code": 200
+        |          }
+        |        }
+        |      ]
+        |    }
+        |]
+      """
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    workingServer.start
+    val port = workingServer.portInUse
+    val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("""{"some":"body"}""", MediaType.APPLICATION_JSON)
+
+    // when
+    val response = httpClient.post(
+      new URL(s"$url/test/header"),
+      Some(requestBody),
+      Headers(Map(
+        "Authorization" -> "Token 123"
+      ))
+    )
+
+    // then
+    assert(response.status.code == 503)
+    assert((parse(response.body.asString) \\ "internal_dummy_error").extract[String] == "Can't load body from file: /tmp/not_existing_file")
+  }
+
   test("correct required header without value") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
@@ -425,6 +589,28 @@ class DummyCreatorIntegrationTest extends FunSuite {
     // then
     assert(response.status.code == 200)
     assert((parse(response.body.asString) \\ "message").extract[String] == "match header")
+  }
+
+  test("missing route scenarios") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+        |[
+        |    {
+        |      "method": "POST",
+        |      "path": "/test/header"
+        |    }
+        |]
+      """.stripMargin).extract[List[Route]]
+
+    // when
+    val thrown = intercept[ConfigurationException] {
+      DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    }
+
+    // then
+    assert(thrown.getMessage == "Empty scenarios for route: POST /test/header")
   }
 
 

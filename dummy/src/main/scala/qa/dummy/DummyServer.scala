@@ -1,6 +1,7 @@
 package qa.dummy
 
 import qa.common.Util
+import qa.common.exception.ConfigurationException
 import qa.common.model.Configuration
 
 object DummyServer {
@@ -17,13 +18,18 @@ object DummyServer {
       initialPort = args(1).toInt
     }
     val configuration = Util.extractConfiguration(file = args(0))
-    val workingServer = DummyCreator.createServer(initialPort, configuration)
-    workingServer.start
-    val port = workingServer.portInUse
+    try {
+      val workingServer = DummyCreator.createServer(initialPort, configuration)
+      workingServer.start
+      val port = workingServer.portInUse
 
-    println(s"Server:\n\thttp://localhost:$port")
-    printConfigurationResources(configuration)
-    println(s"Full configuration:\n\tcurl -XGET http://localhost:$port${DummyCreator.DUMMY_CONFIGURATION}")
+      println(s"Server:\n\thttp://localhost:$port")
+      printConfigurationResources(configuration)
+      println(s"Full configuration:\n\tcurl -XGET http://localhost:$port${DummyCreator.DUMMY_CONFIGURATION}")
+    } catch {
+      case ex: ConfigurationException =>
+        println(s"Configuration Error: ${ex.getMessage}")
+    }
   }
 
   def printConfigurationResources(configuration: Configuration): Unit = {
