@@ -613,5 +613,388 @@ class DummyCreatorIntegrationTest extends FunSuite {
     assert(thrown.getMessage == "Empty scenarios for route: POST /test/header")
   }
 
+  test("missing query param empty") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+        |[
+        |    {
+        |      "method": "POST",
+        |      "path": "/test/header",
+        |      "scenarios": [
+        |        {
+        |          "name": "any",
+        |          "request": {},
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "message": "match query"
+        |            },
+        |            "code": 200
+        |          }
+        |        },
+        |        {
+        |          "name": "missing header",
+        |          "request": {
+        |            "query": {
+        |              "!query": "some query"
+        |            }
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "error": "query parameter is not specified"
+        |            },
+        |            "code": 400
+        |          }
+        |        }
+        |      ]
+        |    }
+        |]
+      """
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    workingServer.start
+    val port = workingServer.portInUse
+    val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
+
+    // when
+    val response = httpClient.post(
+      new URL(s"$url/test/header"),
+      Some(requestBody)
+    )
+
+    // then
+    assert(response.status.code == 400)
+    assert((parse(response.body.asString) \\ "error").extract[String] == "query parameter is not specified")
+  }
+
+  test("missing query param not fit") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+        |[
+        |    {
+        |      "method": "POST",
+        |      "path": "/test/header",
+        |      "scenarios": [
+        |        {
+        |          "name": "any",
+        |          "request": {
+        |            "query": {
+        |              "notfit": "value"
+        |            }
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "message": "match query"
+        |            },
+        |            "code": 200
+        |          }
+        |        },
+        |        {
+        |          "name": "missing header",
+        |          "request": {
+        |            "query": {
+        |              "!query": "some query"
+        |            }
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "error": "query parameter is not specified"
+        |            },
+        |            "code": 400
+        |          }
+        |        }
+        |      ]
+        |    }
+        |]
+      """
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    workingServer.start
+    val port = workingServer.portInUse
+    val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
+
+    // when
+    val response = httpClient.post(
+      new URL(s"$url/test/header"),
+      Some(requestBody)
+    )
+
+    // then
+    assert(response.status.code == 400)
+    assert((parse(response.body.asString) \\ "error").extract[String] == "query parameter is not specified")
+  }
+
+  test("query param different value") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+        |[
+        |    {
+        |      "method": "POST",
+        |      "path": "/test/header",
+        |      "scenarios": [
+        |        {
+        |          "name": "any",
+        |          "request": {
+        |            "query": {
+        |              "query": "different value"
+        |            }
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "message": "match query"
+        |            },
+        |            "code": 200
+        |          }
+        |        },
+        |        {
+        |          "name": "missing header",
+        |          "request": {
+        |            "query": {
+        |              "!query": "some query"
+        |            }
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "error": "query parameter is not specified"
+        |            },
+        |            "code": 400
+        |          }
+        |        }
+        |      ]
+        |    }
+        |]
+      """
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    workingServer.start
+    val port = workingServer.portInUse
+    val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
+
+    // when
+    val response = httpClient.post(
+      new URL(s"$url/test/header"),
+      Some(requestBody)
+    )
+
+    // then
+    assert(response.status.code == 400)
+    assert((parse(response.body.asString) \\ "error").extract[String] == "query parameter is not specified")
+  }
+
+  test("no scenarios with specified query") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+        |[
+        |    {
+        |      "method": "POST",
+        |      "path": "/test/header",
+        |      "scenarios": [
+        |        {
+        |          "name": "any",
+        |          "request": {
+        |            "query": {
+        |              "query": "specified value"
+        |            }
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "message": "match query"
+        |            },
+        |            "code": 200
+        |          }
+        |        }
+        |      ]
+        |    }
+        |]
+      """
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    workingServer.start
+    val port = workingServer.portInUse
+    val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
+
+    // when
+    val response = httpClient.post(
+      new URL(s"$url/test/header?query=any+value"),
+      Some(requestBody)
+    )
+
+    // then
+    assert(response.status.code == 503)
+    assert((parse(response.body.asString) \\ "contract_error").extract[String] == "no any scenarios with specified query")
+  }
+
+  test("query param any value") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+        |[
+        |    {
+        |      "method": "POST",
+        |      "path": "/test/header",
+        |      "scenarios": [
+        |        {
+        |          "name": "any",
+        |          "request": {
+        |            "query": {
+        |              "query": "any value"
+        |            }
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "message": "match query"
+        |            },
+        |            "code": 200
+        |          }
+        |        },
+        |        {
+        |          "name": "missing header",
+        |          "request": {
+        |            "query": {
+        |              "!query": null
+        |            }
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "error": "query parameter is not specified"
+        |            },
+        |            "code": 400
+        |          }
+        |        }
+        |      ]
+        |    }
+        |]
+      """
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    workingServer.start
+    val port = workingServer.portInUse
+    val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
+
+    // when
+    val response = httpClient.post(
+      new URL(s"$url/test/header?query=any+value"),
+      Some(requestBody)
+    )
+
+    // then
+    println(parse(response.body.asString))
+    assert(response.status.code == 200)
+    assert((parse(response.body.asString) \\ "message").extract[String] == "match query")
+  }
+
+  test("query param exact value") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+        |[
+        |    {
+        |      "method": "POST",
+        |      "path": "/test/header",
+        |      "scenarios": [
+        |        {
+        |          "name": "any",
+        |          "request": {
+        |            "query": {
+        |              "query": "exact value"
+        |            }
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "message": "match query"
+        |            },
+        |            "code": 200
+        |          }
+        |        },
+        |        {
+        |          "name": "missing header",
+        |          "request": {
+        |            "query": {
+        |              "!query": "exact value"
+        |            }
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "error": "query parameter is not specified"
+        |            },
+        |            "code": 400
+        |          }
+        |        }
+        |      ]
+        |    }
+        |]
+      """
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    workingServer.start
+    val port = workingServer.portInUse
+    val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
+
+    // when
+    val response = httpClient.post(
+      new URL(s"$url/test/header?query=exact+value"),
+      Some(requestBody)
+    )
+
+    // then
+    assert(response.status.code == 200)
+    assert((parse(response.body.asString) \\ "message").extract[String] == "match query")
+  }
+
+
 
 }

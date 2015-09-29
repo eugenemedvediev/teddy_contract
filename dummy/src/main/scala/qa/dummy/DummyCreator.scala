@@ -13,9 +13,11 @@ import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
 import org.simpleframework.http.Request
 import qa.common.Util
-import qa.common.exception.{ContractException, ConfigurationException}
+import qa.common.exception.{ConfigurationException, ContractException}
 import qa.common.http.Methods
 import qa.common.model.{Configuration, Route, Scenario}
+
+import scala.collection.JavaConversions._
 
 object DummyCreator {
 
@@ -128,13 +130,20 @@ object DummyCreator {
       StaticServerResponse(ContentType(contentType), body, scenario.response.code, scenario.response.headers)
     }
 
-    def requiredResponse(scenario: Scenario, headers: Map[String, String]): StaticServerResponse = {
+    def requiredResponse(scenario: Scenario, headers: Map[String, String], query: Map[String, String]): StaticServerResponse = {
       implicit lazy val formats = org.json4s.DefaultFormats
       val response = scenario.response
-      val requiredHeader: (String, String) = scenario.request.headers.filter(h => !headers.contains(h._1.substring(1)) || (h._2 != null && headers.getOrElse(h._1.substring(1), null) != h._2)).head
       var serializedBody: String = Serialization.write(response.body)
-      if (serializedBody.contains(EXPECTED_HEADER))
-        serializedBody = serializedBody.replaceAll(EXPECTED_HEADER, requiredHeader._1.substring(1))
+      if (scenario.request.query.exists(q => q._1.startsWith("!"))) {
+
+      } else {
+        val requiredHeader: (String, String) =
+          scenario.request.headers.filter(h =>
+            !headers.contains(h._1.substring(1)) || (h._2 != null && headers.getOrElse(h._1.substring(1), null) != h._2)
+          ).head
+        if (serializedBody.contains(EXPECTED_HEADER))
+          serializedBody = serializedBody.replaceAll(EXPECTED_HEADER, requiredHeader._1.substring(1))
+      }
       StaticServerResponse(ContentType(response.headers.getOrElse(CONTENT_TYPE_HEADER, APPLICATION_JSON)), serializedBody, response.code, Map("dummy_scenario" -> scenario.name))
     }
 
@@ -143,13 +152,14 @@ object DummyCreator {
       Map(),
       DynamicServerResponse({ request =>
         try {
+          val query: Map[String, String] = request.getAddress.getQuery.toMap
           val headers: Map[String, String] = Util.getRequestHeaders(request)
           val content = request.getContent
-          val requiredScenario = findRequiredScenario(route.scenarios, headers)
+          val requiredScenario = findRequiredScenario(route.scenarios, headers, query)
           if (requiredScenario != null)
-            requiredResponse(requiredScenario, headers)
+            requiredResponse(requiredScenario, headers, query)
           else {
-            val scenario = findScenario(route.scenarios, headers, content)
+            val scenario = findScenario(route.scenarios, headers, query, content)
             expectedResponse(request, scenario)
           }
         } catch {
@@ -163,11 +173,24 @@ object DummyCreator {
 
   }
 
-  def findRequiredScenario(scenarios: List[Scenario], headers: Map[String, String]): Scenario = {
-    val withRequiredHeaders: List[Scenario] = scenarios.filter(scenario =>
-      scenario.request.headers.exists(h => h._1.startsWith("!"))
+  def findRequiredScenario(scenarios: List[Scenario], headers: Map[String, String] = Map(), query: Map[String, String] = Map()): Scenario = {
+    val withRequiredQuery = scenarios.filter(scenario =>
+      scenario.request.query.nonEmpty && scenario.request.query.exists(q => q._1.startsWith("!"))
     )
-    val list = if (headers == null || headers.isEmpty)
+    val requiredQueries = if (query == null || query.isEmpty)
+      withRequiredQuery
+    else
+      withRequiredQuery.filter(scenario =>
+        scenario.request.query.exists(q => {
+          val key: String = q._1.substring(1)
+          !query.contains(key) || (q._2 != null && query.getOrElse(key, null) != q._2)
+        })
+      )
+
+    val withRequiredHeaders: List[Scenario] = scenarios.filter(scenario =>
+      scenario.request.headers.nonEmpty && scenario.request.headers.exists(h => h._1.startsWith("!"))
+    )
+    val requiredHeaders = if (headers == null || headers.isEmpty)
       withRequiredHeaders
     else
       withRequiredHeaders.filter(scenario =>
@@ -176,17 +199,17 @@ object DummyCreator {
           !headers.contains(key) || (h._2 != null && headers.getOrElse(key, null) != h._2)
         })
       )
-    if (list.isEmpty) null else list.head
+
+    val required = requiredQueries ::: requiredHeaders
+    if (required.isEmpty) null else required.head
 
   }
 
   @throws(classOf[ContractException])
-  def findScenario(scenarios: List[Scenario], headers: Map[String, String], content: String) = {
-    val withHeaders = filterScenariosByHeaders(scenarios, headers)
-    val withBody = filterScenariosByBody(content, withHeaders)
-    if (withBody.isEmpty) {
-      throw new ContractException("no any scenarios with specified body")
-    }
+  def findScenario(scenarios: List[Scenario], headers: Map[String, String], query: Map[String, String], content: String) = {
+    val withQuery = filterScenariosByQuery(scenarios, query)
+    val withHeaders = filterScenariosByHeaders(withQuery, headers)
+    val withBody = filterScenariosByBody(withHeaders, content)
     withBody.head
   }
 
@@ -210,8 +233,32 @@ object DummyCreator {
     list
   }
 
-  def filterScenariosByBody(content: String, scenarios: List[Scenario]): List[Scenario] = {
-    scenarios.filter(bodyCondition(content))
+  @throws(classOf[ContractException])
+  def filterScenariosByQuery(scenarios: List[Scenario], query: Map[String, String]): List[Scenario] = {
+    val list = if (query == null || query.isEmpty) {
+      scenarios.filter(scenario =>
+        scenario.request.query.isEmpty
+      )
+    } else {
+      scenarios.filter(scenario =>
+        scenario.request.query.forall(sq =>
+          query.contains(sq._1) && query.getOrElse(sq._1, null) == sq._2
+        )
+      )
+    }
+
+    if (list.isEmpty) {
+      throw new ContractException("no any scenarios with specified query")
+    }
+    list
+  }
+
+  def filterScenariosByBody(scenarios: List[Scenario], content: String): List[Scenario] = {
+    val list = scenarios.filter(bodyCondition(content))
+    if (list.isEmpty) {
+      throw new ContractException("no any scenarios with specified body")
+    }
+    list
   }
 
   def parseBody(body: JsonAST.JValue): String = {
