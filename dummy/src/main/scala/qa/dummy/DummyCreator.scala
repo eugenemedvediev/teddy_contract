@@ -213,19 +213,32 @@ object DummyCreator {
     withBody.head
   }
 
-  @throws(classOf[ContractException])
-  def filterScenariosByHeaders(scenarios: List[Scenario], headers: Map[String, String]): List[Scenario] = {
-    val list = if (headers == null || headers.isEmpty) {
+  /**
+   * @param scenarios is a list of scenarios which should be filtered
+   * @param smap function which return map in scenario which should be compared
+   * @param amap map with which scenario should be compared
+   * @return list of scenarios which has all elements of amap in smap
+   */
+  private def filterScenarioByMap(scenarios: List[Scenario], smap: Scenario => Map[String, String], amap: Map[String, String]): List[Scenario] = {
+    if (amap == null || amap.isEmpty) {
       scenarios.filter(scenario =>
-        scenario.request.headers.isEmpty
+        smap(scenario).isEmpty
       )
     } else {
       scenarios.filter(scenario =>
-        scenario.request.headers.forall(sh =>
-          headers.contains(sh._1) && headers.getOrElse(sh._1, null) == sh._2
+        smap(scenario).forall(sq =>
+          amap.contains(sq._1) && amap.getOrElse(sq._1, null) == sq._2
         )
       )
     }
+  }
+
+  @throws(classOf[ContractException])
+  def filterScenariosByHeaders(scenarios: List[Scenario], headers: Map[String, String]): List[Scenario] = {
+    require(scenarios != null, "scenarios are absent")
+    require(scenarios.nonEmpty, "scenarios are empty")
+
+    val list = filterScenarioByMap(scenarios, (s: Scenario) => s.request.headers, headers)
 
     if (list.isEmpty) {
       throw new ContractException("no any scenarios with specified header")
@@ -235,18 +248,10 @@ object DummyCreator {
 
   @throws(classOf[ContractException])
   def filterScenariosByQuery(scenarios: List[Scenario], query: Map[String, String]): List[Scenario] = {
-    val list = if (query == null || query.isEmpty) {
-      scenarios.filter(scenario =>
-        scenario.request.query.isEmpty
-      )
-    } else {
-      scenarios.filter(scenario =>
-        scenario.request.query.forall(sq =>
-          query.contains(sq._1) && query.getOrElse(sq._1, null) == sq._2
-        )
-      )
-    }
+    require(scenarios != null, "scenarios are absent")
+    require(scenarios.nonEmpty, "scenarios are empty")
 
+    val list = filterScenarioByMap(scenarios, (s: Scenario) => s.request.query, query)
     if (list.isEmpty) {
       throw new ContractException("no any scenarios with specified query")
     }
@@ -254,6 +259,9 @@ object DummyCreator {
   }
 
   def filterScenariosByBody(scenarios: List[Scenario], content: String): List[Scenario] = {
+    require(scenarios != null, "scenarios are absent")
+    require(scenarios.nonEmpty, "scenarios are empty")
+
     val list = scenarios.filter(bodyCondition(content))
     if (list.isEmpty) {
       throw new ContractException("no any scenarios with specified body")
@@ -283,11 +291,16 @@ object DummyCreator {
     }
   }
 
+  // TODO: add support for string value, xml, html, text/plain
   def bodyCondition(content: String): (Scenario) => Boolean = { scenario =>
     implicit lazy val formats = org.json4s.DefaultFormats
     if (scenario.request.body == null) true
-    else if (content == null || content.isEmpty) false
-    else parse(content) == parse(Serialization.write(scenario.request.body))
+    else if (content == null) false
+    else if (content.isEmpty) {
+      content == scenario.request.body
+    } else{
+      parse(content) == parse(Serialization.write(scenario.request.body))
+    }
   }
 
 }

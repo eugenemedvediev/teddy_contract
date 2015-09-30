@@ -10,6 +10,386 @@ import qa.common.model.{Route, Scenario, ScenarioRequest, ScenarioResponse}
 
 class DummyCreatorTest extends FunSuite {
 
+  test("filterScenariosByBody: scenarios: null, content: null") {
+    // given
+    val scenarios = null
+    val content = null
+
+    // when
+    val thrown = intercept[IllegalArgumentException](
+    	DummyCreator.filterScenariosByBody(scenarios, content)
+    )
+
+    // then
+    assert(thrown.getMessage === "requirement failed: scenarios are absent")
+  }
+
+  test("filterScenariosByBody: scenarios: empty, content: null") {
+    // given
+    val scenarios = List[Scenario]()
+    val content = null
+
+    // when
+    val thrown = intercept[IllegalArgumentException](
+    	DummyCreator.filterScenariosByBody(scenarios, content)
+    )
+
+    // then
+    assert(thrown.getMessage === "requirement failed: scenarios are empty")
+  }
+
+  test("filterScenariosByBody: scenarios: nonEmpty(no body), content: null") {
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val content = null
+
+    // when
+    val list = DummyCreator.filterScenariosByBody(scenarios, content)
+
+    // then
+    assert(list.size === 1)
+  }
+
+  test("filterScenariosByBody: scenarios: nonEmpty(body), content: null") {
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(body =
+        parse("""{"key": "value"}""")
+      ),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val content = null
+
+    // when
+    val thrown = intercept[ContractException](
+    	DummyCreator.filterScenariosByBody(scenarios, content)
+    )
+
+    // then
+    assert(thrown.getMessage === "no any scenarios with specified body")
+  }
+
+  test("filterScenariosByBody: scenarios: nonEmpty(no body), content: empty") {
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val content = "\"\""
+
+    // when
+    val list = DummyCreator.filterScenariosByBody(scenarios, content)
+
+    // then
+    assert(list.size === 1)
+  }
+
+  test("filterScenariosByBody: scenarios: nonEmpty(body), content: empty") {
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(body =
+        parse("""{"key": "value"}""")
+      ),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val content = ""
+
+    // when
+    val thrown = intercept[ContractException](
+    	DummyCreator.filterScenariosByBody(scenarios, content)
+    )
+
+    // then
+    assert(thrown.getMessage === "no any scenarios with specified body")
+  }
+
+  test("filterScenariosByBody: scenarios: nonEmpty(no body), content: nonEmpty") {
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val content = """{"key": "value"}"""
+
+    // when
+    val list = DummyCreator.filterScenariosByBody(scenarios, content)
+
+    // then
+    assert(list.size === 1)
+  }
+
+  test("filterScenariosByBody: scenarios: nonEmpty(body), content: nonEmpty don't fit") {
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(body =
+        parse("""{"key": "value"}""")
+      ),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val content = """{"key": "value2"}"""
+
+    // when
+    val thrown = intercept[ContractException](
+    	DummyCreator.filterScenariosByBody(scenarios, content)
+    )
+
+    // then
+    assert(thrown.getMessage === "no any scenarios with specified body")
+  }
+
+  test("filterScenariosByBody: scenarios: nonEmpty(body), content: nonEmpty fit one") {
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(body =
+        parse("""{"key": "value"}""")
+      ),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val content = """{"key": "value"}"""
+
+    // when
+    val list = DummyCreator.filterScenariosByBody(scenarios, content)
+
+    // then
+    assert(list.size === 1)
+  }
+
+  test("filterScenariosByBody: scenarios: nonEmpty(body), content: nonEmpty fit multi") {
+    val scenario1 = new Scenario(
+      "name",
+      new ScenarioRequest(body =
+        parse("""{"key": "value"}""")
+      ),
+      new ScenarioResponse(code = 200)
+    )
+    val scenario2 = new Scenario(
+      "name",
+      new ScenarioRequest(body =
+        parse("""{"key": "value"}""")
+      ),
+      new ScenarioResponse(code = 200)
+    )
+    val scenario3 = new Scenario(
+      "name",
+      new ScenarioRequest(body =
+        parse("""{"key": "value don't fit"}""")
+      ),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario1, scenario2, scenario3)
+    val content = """{"key": "value"}"""
+
+    // when
+    val list = DummyCreator.filterScenariosByBody(scenarios, content)
+
+    // then
+    assert(list.size === 2)
+  }
+
+  test("filterScenariosByQuery scenarios: null; query: null") {
+    // given
+    val scenarios = null
+    val query = null
+
+    // when
+    val thrown = intercept[IllegalArgumentException](
+    	DummyCreator.filterScenariosByQuery(scenarios, query)
+    )
+
+    // then
+    assert(thrown.getMessage === "requirement failed: scenarios are absent")
+  }
+
+  test("filterScenariosByQuery scenarios: empty; query: null") {
+    // given
+    val scenarios = List[Scenario]()
+    val query = null
+
+    // when
+    val thrown = intercept[IllegalArgumentException](
+    	DummyCreator.filterScenariosByQuery(scenarios, query)
+    )
+
+    // then
+    assert(thrown.getMessage === "requirement failed: scenarios are empty")
+  }
+
+  test("filterScenariosByQuery scenarios: nonEmpty(no query); query: null") {
+    // given
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val query = null
+
+    // when
+    val list = DummyCreator.filterScenariosByQuery(scenarios, query)
+
+    // then
+    assert(list.size === 1)
+  }
+
+  test("filterScenariosByQuery scenarios: nonEmpty(query); query: null") {
+    // given
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(query = Map[String, String](
+      	"param" -> "value"
+      )),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val query = null
+
+    // when
+    val thrown = intercept[ContractException](
+    	DummyCreator.filterScenariosByQuery(scenarios, query)
+    )
+
+    // then
+    assert(thrown.getMessage === "no any scenarios with specified query")
+  }
+
+  test("filterScenariosByQuery scenarios: nonEmpty(no query); query: empty") {
+    // given
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val query = Map[String, String]()
+
+    // when
+    val list = DummyCreator.filterScenariosByQuery(scenarios, query)
+
+    // then
+    assert(list.size === 1)
+  }
+
+  test("filterScenariosByQuery scenarios: nonEmpty(query); query: empty") {
+    // given
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(query = Map[String, String](
+      	"param" -> "value"
+      )),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val query = Map[String, String]()
+
+    // when
+    val thrown = intercept[ContractException](
+    	DummyCreator.filterScenariosByQuery(scenarios, query)
+    )
+
+    // then
+    assert(thrown.getMessage === "no any scenarios with specified query")
+  }
+
+  test("filterScenariosByQuery scenarios: nonEmpty(no query); query: nonEmpty") {
+    // given
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val query = Map[String, String]("param" -> "value")
+
+    // when
+    val list = DummyCreator.filterScenariosByQuery(scenarios, query)
+
+    // then
+    assert(list.size === 1)
+  }
+
+  test("filterScenariosByQuery scenarios: nonEmpty(query); query: nonEmpty don't fit") {
+    // given
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(query = Map[String, String](
+      	"param" -> "value2"
+      )),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val query = Map[String, String]("param" -> "value")
+
+    // when
+    val thrown = intercept[ContractException](
+    	DummyCreator.filterScenariosByQuery(scenarios, query)
+    )
+
+    // then
+    assert(thrown.getMessage === "no any scenarios with specified query")
+  }
+
+  test("filterScenariosByQuery scenarios: nonEmpty(query); query: nonEmpty fit one") {
+    // given
+    val scenario = new Scenario(
+      "name",
+      new ScenarioRequest(query = Map[String, String](
+      	"param" -> "value"
+      )),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario)
+    val query = Map[String, String]("param" -> "value")
+
+    // when
+    val list = DummyCreator.filterScenariosByQuery(scenarios, query)
+
+    // then
+    assert(list.size === 1)
+  }
+
+  test("filterScenariosByQuery scenarios: nonEmpty(query); query: nonEmpty fit multi") {
+    // given
+    val scenario1 = new Scenario(
+      "name",
+      new ScenarioRequest(query = Map[String, String](
+      	"param" -> "value"
+      )),
+      new ScenarioResponse(code = 200)
+    )
+    val scenario2 = new Scenario(
+      "name",
+      new ScenarioRequest(query = Map[String, String](
+      	"param" -> "value"
+      )),
+      new ScenarioResponse(code = 200)
+    )
+    val scenario3 = new Scenario(
+      "name",
+      new ScenarioRequest(query = Map[String, String](
+      	"param" -> "value different"
+      )),
+      new ScenarioResponse(code = 200)
+    )
+    val scenarios = List[Scenario](scenario1, scenario2, scenario3)
+    val query = Map[String, String]("param" -> "value")
+
+    // when
+    val list = DummyCreator.filterScenariosByQuery(scenarios, query)
+
+    // then
+    assert(list.size === 2)
+  }
+
   test("filterScenariosByHeaders headers empty") {
     // given
     val scenario = new Scenario("ok", new ScenarioRequest(), new ScenarioResponse(code = 200))
