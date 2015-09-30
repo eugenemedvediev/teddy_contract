@@ -64,7 +64,7 @@ lazy val dummy = (project in file("dummy")).
     libraryDependencies ++= Seq(
       simplyscala,
       json4s,
-      "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0" excludeAll(ExclusionRule(organization = "org.scalatest")),
+      "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0"  % "it" excludeAll(ExclusionRule(organization = "org.scalatest"), ExclusionRule(organization = "javax.servlet")),
       "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test,it"
     ),
     Defaults.itSettings,
