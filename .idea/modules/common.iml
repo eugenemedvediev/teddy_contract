@@ -21,8 +21,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="SBT: com.github.simplyscala:simplyscala-server_2.10:0.5:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.simpleframework:simple:5.1.5:jar" level="project" />
     <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.10.5:jar" level="project" />
     <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-annotations:2.3.0:jar" level="project" />
     <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-core:2.3.1:jar" level="project" />

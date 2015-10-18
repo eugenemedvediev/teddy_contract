@@ -1,7 +1,6 @@
-package qa.common.http
+package qa.http
 
 import fr.simply._
-
 /**
  * Created by ievgen on 30/07/15.
  */

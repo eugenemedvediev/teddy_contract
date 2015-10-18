@@ -1,0 +1,34 @@
+{
+  "template": {
+    "id": "@book_id",
+    "type": "book",
+    "name": "any name",
+    "city": "@city_id",
+    "authors": [
+      "one",
+      "two",
+      "three"
+    ]
+  },
+  "values": [
+    {
+      "id": "1",
+      "type": "book",
+      "name": "Java OOP",
+      "city": "Haarlem",
+      "authors": [
+        "one"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "book",
+      "name": "Scala Functional Programming",
+      "city": "Haarlem",
+      "authors": [
+        "two"
+      ]
+    }
+  ]
+}
+

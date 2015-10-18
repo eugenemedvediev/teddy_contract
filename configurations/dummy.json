@@ -3,7 +3,7 @@
   "api": [
     {
       "method": "POST",
-      "path": "/wires/servers",
+      "path": "/wires/servers/",
       "scenarios": [
         {
           "name": "Required Authorization header",

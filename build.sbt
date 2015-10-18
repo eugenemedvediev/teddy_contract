@@ -5,6 +5,7 @@ resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repos
 
 resolvers += "Big Bee Consultants" at "http://bigbeeconsultants.co.uk/repo"
 
+val simpleframework = "org.simpleframework" % "simple" % "5.1.5"
 val simplyscala = "com.github.simplyscala" %% "simplyscala-server" % "0.5"
 val json4s = "org.json4s" %% "json4s-jackson" % "3.2.11"
 val configs = "com.github.kxbmap" %% "configs" % "0.2.2"
@@ -27,11 +28,19 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.10.5"
 )
 
+lazy val http = (project in file("http")).
+  settings(commonSettings: _*).
+  settings(
+    libraryDependencies ++= Seq(
+//      simplyscala
+    ),
+    exportJars := true
+  )
+
 lazy val common = (project in file("common")).
   settings(commonSettings: _*).
   settings(
     libraryDependencies ++= Seq(
-      simplyscala,
       json4s
     ),
     exportJars := true
@@ -41,7 +50,8 @@ lazy val scenario = (project in file("scenario")).
   settings(commonSettings: _*).
   settings(
     libraryDependencies ++= Seq(
-      simplyscala,
+      simpleframework,
+      //      simplyscala,
       json4s,
       configs,
       apacheClient,
@@ -55,14 +65,15 @@ lazy val scenario = (project in file("scenario")).
     mainClass in oneJar := Some("qa.scenario.ScenarioServer")
   ).
   configs(IntegrationTest).
-  dependsOn(common)
+  dependsOn(common, http)
 
 
 lazy val dummy = (project in file("dummy")).
   settings(commonSettings: _*).
   settings(
     libraryDependencies ++= Seq(
-      simplyscala,
+      simpleframework,
+//      simplyscala,
       json4s,
       "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0"  % "it" excludeAll(ExclusionRule(organization = "org.scalatest"), ExclusionRule(organization = "javax.servlet")),
       "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test,it"
@@ -74,7 +85,7 @@ lazy val dummy = (project in file("dummy")).
     mainClass in oneJar := Some("qa.dummy.DummyServer")
   ).
   configs(IntegrationTest).
-  dependsOn(common)
+  dependsOn(common, http)
 
 lazy val teddy_contract = (project in file(".")).
   settings(

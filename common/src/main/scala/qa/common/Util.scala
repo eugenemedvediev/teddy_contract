@@ -2,7 +2,6 @@ package qa.common
 
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import org.simpleframework.http.Request
 import qa.common.model.Configuration
 
 object Util {
@@ -16,13 +15,6 @@ object Util {
 
   def jsonFromFile(name: String): JValue = {
     parse(scala.io.Source.fromFile(name).getLines().mkString)
-  }
-
-  def getRequestHeaders(request: Request): Map[String, String] = {
-    val tuples: List[(String, String)] = for {
-      name <- request.getNames.toArray.toList
-    } yield (name.toString, request.getValue(name.toString))
-    tuples.toMap
   }
 
   def extractConfiguration(file: String): Configuration = {

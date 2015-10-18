@@ -14,7 +14,7 @@ import org.json4s.jackson.Serialization
 import org.simpleframework.http.Request
 import qa.common.Util
 import qa.common.exception.{ConfigurationException, ContractException}
-import qa.common.http.Methods
+import qa.http.Methods
 import qa.common.model.{Configuration, Route, Scenario}
 
 import scala.collection.JavaConversions._
@@ -90,7 +90,7 @@ object DummyCreator {
     GET(
       path = DUMMY_CONFIGURATION,
       response = DynamicServerResponse({ request =>
-        val headers = Util.getRequestHeaders(request)
+        val headers = getRequestHeaders(request)
         headers.get(ACCEPT_HEADER) match {
           case Some(contentType) => {
             contentType match {
@@ -153,7 +153,7 @@ object DummyCreator {
       DynamicServerResponse({ request =>
         try {
           val query: Map[String, String] = request.getAddress.getQuery.toMap
-          val headers: Map[String, String] = Util.getRequestHeaders(request)
+          val headers: Map[String, String] = getRequestHeaders(request)
           val content = request.getContent
           val requiredScenario = findRequiredScenario(route.scenarios, headers, query)
           if (requiredScenario != null)
@@ -301,6 +301,13 @@ object DummyCreator {
     } else{
       parse(content) == parse(Serialization.write(scenario.request.body))
     }
+  }
+
+  def getRequestHeaders(request: Request): Map[String, String] = {
+    val tuples: List[(String, String)] = for {
+      name <- request.getNames.toArray.toList
+    } yield (name.toString, request.getValue(name.toString))
+    tuples.toMap
   }
 
 }

@@ -23,6 +23,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../../scenario/src/test/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../scenario/target/scala-2.10/resource_managed/it" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../scenario/target/scala-2.10/resource_managed/test" type="java-test-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/../../scenario/target/one-jar-redist" />
       <excludeFolder url="file://$MODULE_DIR$/../../scenario/target/resolution-cache" />
       <excludeFolder url="file://$MODULE_DIR$/../../scenario/target/streams" />
     </content>
@@ -33,14 +34,12 @@
     <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-annotations:2.3.0:jar" level="project" />
     <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-core:2.3.1:jar" level="project" />
     <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-databind:2.3.1:jar" level="project" />
-    <orderEntry type="library" name="SBT: com.github.simplyscala:simplyscala-server_2.10:0.5:jar" level="project" />
     <orderEntry type="library" name="SBT: com.thoughtworks.paranamer:paranamer:2.6:jar" level="project" />
     <orderEntry type="library" name="SBT: org.json4s:json4s-ast_2.10:3.2.11:jar" level="project" />
     <orderEntry type="library" name="SBT: org.json4s:json4s-core_2.10:3.2.11:jar" level="project" />
     <orderEntry type="library" name="SBT: org.json4s:json4s-jackson_2.10:3.2.11:jar" level="project" />
     <orderEntry type="library" name="SBT: org.scala-lang:scala-compiler:2.10.0:jar" level="project" />
     <orderEntry type="library" name="SBT: org.scala-lang:scalap:2.10.0:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.simpleframework:simple:5.1.5:jar" level="project" />
     <orderEntry type="library" name="SBT: com.github.kxbmap:configs_2.10:0.2.2:jar" level="project" />
     <orderEntry type="library" name="SBT: com.typesafe:config:1.2.1:jar" level="project" />
     <orderEntry type="library" name="SBT: commons-codec:commons-codec:1.6:jar" level="project" />
@@ -51,5 +50,16 @@
     <orderEntry type="library" scope="TEST" name="SBT: org.scala-lang:scala-reflect:2.10.3:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scalatest:scalatest_2.10:2.1.3:jar" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="SBT: javax.servlet:servlet-api:2.5:jar" level="project" />
+    <orderEntry type="module" module-name="http" exported="" />
+    <orderEntry type="module-library">
+      <library name="SBT: unmanaged-jars">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../http/lib/simplyscala-server_2.10-0.6-SNAPSHOT.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="SBT: org.simpleframework:simple:5.1.5:jar" level="project" />
   </component>
 </module>

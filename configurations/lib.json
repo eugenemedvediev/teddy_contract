@@ -1,0 +1,21 @@
+{
+  "description": "Library",
+  "api": [
+    {
+      "method": "GET",
+      "path": "/city/*/book/*",
+      "scenarios": [
+        {
+          "name": "ok",
+          "response": {
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "multi_body": "@/Users/ievgen/github/teddy_contract/configurations/lib/multi_books.json",
+            "code": 200
+          }
+        }
+      ]
+    }
+  ]
+}

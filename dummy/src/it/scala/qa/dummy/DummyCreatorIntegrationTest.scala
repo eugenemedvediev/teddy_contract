@@ -995,6 +995,51 @@ class DummyCreatorIntegrationTest extends FunSuite {
     assert((parse(response.body.asString) \\ "message").extract[String] == "match query")
   }
 
+  test("path params") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+        |[
+        |    {
+        |      "method": "POST",
+        |      "path": "/test/*/header/*",
+        |      "scenarios": [
+        |        {
+        |          "name": "any",
+        |          "request": {
+        |          },
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "message": "match path"
+        |            },
+        |            "code": 200
+        |          }
+        |        }
+        |      ]
+        |    }
+        |]
+      """
+        .stripMargin).extract[List[Route]]
+    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    workingServer.start
+    val port = workingServer.portInUse
+    val url = s"http://localhost:$port"
+    val httpClient = new HttpClient
+    val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
 
+    // when
+    val response = httpClient.post(
+      new URL(s"$url/test/17/header/33?query=exact+value"),
+      Some(requestBody)
+    )
+
+    // then
+    assert(response.status.code == 200)
+    assert((parse(response.body.asString) \\ "message").extract[String] == "match path")
+  }
 
 }
