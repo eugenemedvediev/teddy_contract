@@ -3,7 +3,7 @@
   "api": [
     {
       "method": "GET",
-      "path": "/city/*/book/*",
+      "path": "/**city/*/book/*",
       "scenarios": [
         {
           "name": "ok",
@@ -11,7 +11,10 @@
             "headers": {
               "Content-Type": "application/json"
             },
-            "multi_body": "@/Users/ievgen/github/teddy_contract/configurations/lib/multi_books.json",
+            "body": {
+              "parent": "${*0}",
+              "child": "${*1}"
+            },
             "code": 200
           }
         }

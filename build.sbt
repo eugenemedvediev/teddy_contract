@@ -1,12 +1,11 @@
 import com.github.retronym.SbtOneJar._
-import sbt.Defaults
+import sbt._
+import sbt.Keys._
 
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
 resolvers += "Big Bee Consultants" at "http://bigbeeconsultants.co.uk/repo"
 
-val simpleframework = "org.simpleframework" % "simple" % "5.1.5"
-val simplyscala = "com.github.simplyscala" %% "simplyscala-server" % "0.5"
 val json4s = "org.json4s" %% "json4s-jackson" % "3.2.11"
 val configs = "com.github.kxbmap" %% "configs" % "0.2.2"
 val apacheClient = "org.apache.httpcomponents" % "httpclient" % "4.3.6"
@@ -23,19 +22,37 @@ val itTestFilter: String => Boolean = { name =>
 }
 
 lazy val commonSettings = Seq(
-  organization := "com.isightpartners",
+  organization := "com.github.eugenemedvediev",
   version := "0.0.1",
   scalaVersion := "2.10.5"
 )
+
+lazy val apiserver = (project in file("apiserver")).
+//  settings(commonSettings: _*).
+  settings(
+    libraryDependencies ++= Seq(
+      "org.simpleframework" % "simple-http" % "6.0.1",
+      "org.simpleframework" % "simple-transport" % "6.0.1",
+      "org.scalatest" %% "scalatest" % "2.2.6" % "test",
+      "com.typesafe.play" % "play-ws_2.10" % "2.4.6" % "test"
+      ),
+    exportJars := true
+  )
 
 lazy val http = (project in file("http")).
   settings(commonSettings: _*).
   settings(
     libraryDependencies ++= Seq(
-//      simplyscala
+      ////      pathmatcher
+      ////      simplyscala
     ),
-    exportJars := true
-  )
+    //    unmanagedBase <<= baseDirectory { base => base / "../lib" }
+    //,
+    //    unmanagedJars in Compile += file("../lib/apiserver_2.10-0.0.1-one-jar.jar")
+    exportJars := true//,
+//    retrieveManaged := true
+  ).
+  dependsOn(apiserver)
 
 lazy val common = (project in file("common")).
   settings(commonSettings: _*).
@@ -50,7 +67,7 @@ lazy val scenario = (project in file("scenario")).
   settings(commonSettings: _*).
   settings(
     libraryDependencies ++= Seq(
-      simpleframework,
+//      simpleframework,
       //      simplyscala,
       json4s,
       configs,
@@ -72,15 +89,16 @@ lazy val dummy = (project in file("dummy")).
   settings(commonSettings: _*).
   settings(
     libraryDependencies ++= Seq(
-      simpleframework,
-//      simplyscala,
+//      simpleframework,
+      //      simplyscala,
       json4s,
-      "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0"  % "it" excludeAll(ExclusionRule(organization = "org.scalatest"), ExclusionRule(organization = "javax.servlet")),
+      "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0" % "it" excludeAll(ExclusionRule(organization = "org.scalatest"), ExclusionRule(organization = "javax.servlet")),
       "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test,it"
     ),
     Defaults.itSettings,
     testOptions in IntegrationTest += Tests.Filter(itTestFilter),
     parallelExecution in IntegrationTest := true,
+    //    unmanagedBase <<= baseDirectory { base => base / "../lib" },
     oneJarSettings,
     mainClass in oneJar := Some("qa.dummy.DummyServer")
   ).
@@ -91,4 +109,5 @@ lazy val teddy_contract = (project in file(".")).
   settings(
     name := "teddy_contract"
   ).
-  aggregate(dummy, scenario)
+  aggregate(dummy)
+//  aggregate(dummy, scenario)

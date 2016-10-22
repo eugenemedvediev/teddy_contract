@@ -1,21 +1,20 @@
 package qa.dummy
 
 /**
- *
- * @author Ievgen Medvediev
- * @since 4/3/15
- */
+  *
+  * @author Ievgen Medvediev
+  * @since 4/3/15
+  */
 
-import fr.simply._
-import fr.simply.util._
+import nl.medvediev.apiserver._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
 import org.simpleframework.http.Request
 import qa.common.Util
 import qa.common.exception.{ConfigurationException, ContractException}
-import qa.http.Methods
 import qa.common.model.{Configuration, Route, Scenario}
+import qa.http.Methods
 
 import scala.collection.JavaConversions._
 
@@ -26,21 +25,19 @@ object DummyCreator {
   val CONTENT_TYPE_HEADER = "Content-Type"
   val APPLICATION_JSON = "application/json"
   val TEXT_HTML = "text/html"
-  val APPLICATION_JSON_CONTENT_TYPE = fr.simply.util.ContentType(APPLICATION_JSON)
-  val TEXT_HTML_CONTENT_TYPE = fr.simply.util.Text_Html
-  val TEXT_PLAIN_CONTENT_TYPE = fr.simply.util.Text_Plain
+  val TEXT_PLAIN = "text/plain"
   val EXPECTED_HEADER = "@expectedHeader"
 
   @throws(classOf[ConfigurationException])
   def createServer(port: Int, configuration: Configuration) = {
     configuration.api.foreach(validateRoute)
-    val routes: List[ServerRoute] = createConfigurationRoute(configuration) :: createServerRoutes(configuration.api)
-    new StubServer(port, routes.toArray: _*).defaultResponse(APPLICATION_JSON_CONTENT_TYPE, ContractError.NOT_SUPPORTED_PATH_ERROR, 503)
+    val routes: List[APIRoute] = createConfigurationRoute(configuration) :: createAPIRoutes(configuration.api)
+    new APIServer(port, routes).defaultResponse(503, APPLICATION_JSON, ContractError.NOT_SUPPORTED_PATH_ERROR)
   }
 
   @throws(classOf[ConfigurationException])
   def validateRoute(route: Route): Unit = {
-    if (route.path.isEmpty || !route.path.startsWith("/")) {
+    if (route.path.isEmpty || !(route.path.startsWith("/") || route.path.startsWith("**"))) {
       throw new ConfigurationException( s"""Not valid path: "${route.path}"""")
     }
     if (route.method.isEmpty || !Methods.methods.keySet.contains(route.method)) {
@@ -51,12 +48,12 @@ object DummyCreator {
     }
   }
 
-  def createConfigurationRoute(configuration: Configuration): ServerRoute = {
+  def createConfigurationRoute(configuration: Configuration): APIRoute = {
 
     def generateConfigurationHtmlContent(configuration: Configuration): String = {
       implicit val formats = DefaultFormats
       val list = Util.getStringifiedRoutes(configuration)
-      val htmlList = list.foldLeft[String]("")( (string, elem) => s"$string\n<li>$elem</li>" )
+      val htmlList = list.foldLeft[String]("")((string, elem) => s"$string\n<li>$elem</li>")
       val html: String =
         """
           |<!DOCTYPE html>
@@ -82,55 +79,62 @@ object DummyCreator {
       pretty(parse(Serialization.write(configuration)))
     }
 
-    def textPlainResponse: StaticServerResponse = {
+    def textPlainResponse: SimpleAPIResponse = {
       val pageContent: String = generateConfigurationJsonContent(configuration)
-      StaticServerResponse(TEXT_PLAIN_CONTENT_TYPE, pageContent, 200)
+      SimpleAPIResponse(200, TEXT_PLAIN, pageContent)
     }
 
     GET(
       path = DUMMY_CONFIGURATION,
-      response = DynamicServerResponse({ request =>
-        val headers = getRequestHeaders(request)
-        headers.get(ACCEPT_HEADER) match {
-          case Some(contentType) => {
-            contentType match {
-              case value if value.contains(APPLICATION_JSON) =>
-                StaticServerResponse(APPLICATION_JSON_CONTENT_TYPE, generateConfigurationJsonContent(configuration), 200)
-              case value if value.contains(TEXT_HTML) =>
-                StaticServerResponse(TEXT_HTML_CONTENT_TYPE, generateConfigurationHtmlContent(configuration), 200)
-              case _ => textPlainResponse
+      params = Map(),
+      response = DynamicAPIResponse({
+        (request, patterns) =>
+          val headers = getRequestHeaders(request)
+          headers.get(ACCEPT_HEADER) match {
+            case Some(contentType) => {
+              contentType match {
+                case value if value.contains(APPLICATION_JSON) =>
+                  SimpleAPIResponse(200, APPLICATION_JSON, generateConfigurationJsonContent(configuration))
+                case value if value.contains(TEXT_HTML) =>
+                  SimpleAPIResponse(200, TEXT_HTML, generateConfigurationHtmlContent(configuration))
+                case _ => textPlainResponse
+              }
             }
+            case None => textPlainResponse
           }
-          case None => textPlainResponse
-        }
       })
     )
 
   }
 
   @throws(classOf[ConfigurationException])
-  def createServerRoutes(list: List[Route]) = {
-    def loop(list: List[Route], acc: List[ServerRoute]): List[ServerRoute] = list match {
+  def createAPIRoutes(list: List[Route]) = {
+    def loop(list: List[Route], acc: List[APIRoute]): List[APIRoute] = list match {
       case Nil => acc
-      case x :: xs => createServerRoute(x) :: loop(xs, acc)
+      case x :: xs => createAPIRoute(x) :: loop(xs, acc)
     }
     loop(list, List())
   }
 
-  def createServerRoute(route: Route): ServerRoute = {
+  def createAPIRoute(route: Route): APIRoute = {
 
-    def expectedResponse(request: Request, scenario: Scenario): StaticServerResponse = {
+    def expectedResponse(request: Request, scenario: Scenario, patterns: List[(String, String)]): SimpleAPIResponse = {
       implicit lazy val formats = org.json4s.DefaultFormats
       val contentType: String = scenario.response.headers.getOrElse(CONTENT_TYPE_HEADER, APPLICATION_JSON)
       val body =
-        if (contentType.equals(APPLICATION_JSON))
-          parseBody(parse(Serialization.write(scenario.response.body)))
+        if (contentType.equals(APPLICATION_JSON)) {
+          var parsedBody: String = parseBody(parse(Serialization.write(scenario.response.body)))
+          for (i <- patterns.indices) {
+            parsedBody = parsedBody.replace(s"$${*$i}", patterns(i)._2)
+          }
+          parsedBody
+        }
         else
           scenario.response.body.toString
-      StaticServerResponse(ContentType(contentType), body, scenario.response.code, scenario.response.headers)
+      SimpleAPIResponse(scenario.response.code, contentType, body, scenario.response.headers)
     }
 
-    def requiredResponse(scenario: Scenario, headers: Map[String, String], query: Map[String, String]): StaticServerResponse = {
+    def requiredResponse(scenario: Scenario, headers: Map[String, String], query: Map[String, String]): SimpleAPIResponse = {
       implicit lazy val formats = org.json4s.DefaultFormats
       val response = scenario.response
       var serializedBody: String = Serialization.write(response.body)
@@ -144,30 +148,31 @@ object DummyCreator {
         if (serializedBody.contains(EXPECTED_HEADER))
           serializedBody = serializedBody.replaceAll(EXPECTED_HEADER, requiredHeader._1.substring(1))
       }
-      StaticServerResponse(ContentType(response.headers.getOrElse(CONTENT_TYPE_HEADER, APPLICATION_JSON)), serializedBody, response.code, Map("dummy_scenario" -> scenario.name))
+      SimpleAPIResponse(response.code, response.headers.getOrElse(CONTENT_TYPE_HEADER, APPLICATION_JSON), serializedBody, Map("dummy_scenario" -> scenario.name))
     }
 
     Methods.get(route.method)(
       route.path,
       Map(),
-      DynamicServerResponse({ request =>
-        try {
-          val query: Map[String, String] = request.getAddress.getQuery.toMap
-          val headers: Map[String, String] = getRequestHeaders(request)
-          val content = request.getContent
-          val requiredScenario = findRequiredScenario(route.scenarios, headers, query)
-          if (requiredScenario != null)
-            requiredResponse(requiredScenario, headers, query)
-          else {
-            val scenario = findScenario(route.scenarios, headers, query, content)
-            expectedResponse(request, scenario)
+      DynamicAPIResponse({
+        (request, patterns) =>
+          try {
+            val query: Map[String, String] = request.getAddress.getQuery.toMap
+            val headers: Map[String, String] = getRequestHeaders(request)
+            val content = request.getContent
+            val requiredScenario = findRequiredScenario(route.scenarios, headers, query)
+            if (requiredScenario != null)
+              requiredResponse(requiredScenario, headers, query)
+            else {
+              val scenario = findScenario(route.scenarios, headers, query, content)
+              expectedResponse(request, scenario, patterns)
+            }
+          } catch {
+            case ex: ContractException =>
+              SimpleAPIResponse(503, APPLICATION_JSON, ContractError.CONTRACT_ERROR.format(ex.getMessage))
+            case t: Throwable =>
+              SimpleAPIResponse(503, APPLICATION_JSON, ContractError.DUMMY_ERROR.format(t.getMessage))
           }
-        } catch {
-          case ex: ContractException =>
-            StaticServerResponse(APPLICATION_JSON_CONTENT_TYPE, ContractError.CONTRACT_ERROR.format(ex.getMessage), 503)
-          case t: Throwable =>
-            StaticServerResponse(APPLICATION_JSON_CONTENT_TYPE, ContractError.DUMMY_ERROR.format(t.getMessage), 503)
-        }
       })
     )
 
@@ -214,11 +219,11 @@ object DummyCreator {
   }
 
   /**
-   * @param scenarios is a list of scenarios which should be filtered
-   * @param smap function which return map in scenario which should be compared
-   * @param amap map with which scenario should be compared
-   * @return list of scenarios which has all elements of amap in smap
-   */
+    * @param scenarios is a list of scenarios which should be filtered
+    * @param smap      function which return map in scenario which should be compared
+    * @param amap      map with which scenario should be compared
+    * @return list of scenarios which has all elements of amap in smap
+    */
   private def filterScenarioByMap(scenarios: List[Scenario], smap: Scenario => Map[String, String], amap: Map[String, String]): List[Scenario] = {
     if (amap == null || amap.isEmpty) {
       scenarios.filter(scenario =>
@@ -298,7 +303,7 @@ object DummyCreator {
     else if (content == null) false
     else if (content.isEmpty) {
       content == scenario.request.body
-    } else{
+    } else {
       parse(content) == parse(Serialization.write(scenario.request.body))
     }
   }

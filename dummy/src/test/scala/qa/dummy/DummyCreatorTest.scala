@@ -656,6 +656,15 @@ class DummyCreatorTest extends FunSuite {
     assert(thrown.getMessage === s"""Not valid path: "somepath"""")
   }
 
+  test("validateRoute valid path starts from **") {
+    val scenario = new Scenario("ok", new ScenarioRequest(), new ScenarioResponse(code = 200))
+    // given
+    val route = new Route("GET", "**/", List[Scenario](scenario))
+
+    // when
+    DummyCreator.validateRoute(route)
+  }
+
   test("validateRoute invalid method empty") {
     // given
     val route = new Route("", "/", List[Scenario]())

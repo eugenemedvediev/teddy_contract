@@ -405,7 +405,7 @@ class DummyCreatorIntegrationTest extends FunSuite {
 
     // then
     assert(response.status.code == 200)
-    assert(response.body.asString == "match header\n")
+    assert(response.body.asString == "match header")
   }
 
 

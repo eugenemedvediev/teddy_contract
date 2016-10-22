@@ -21,7 +21,7 @@ object DummyServer {
     try {
       val workingServer = DummyCreator.createServer(initialPort, configuration)
       workingServer.start
-      val port = workingServer.portInUse
+      val port = workingServer.getPort
 
       println(s"Server:\n\thttp://localhost:$port")
       printConfigurationResources(configuration)

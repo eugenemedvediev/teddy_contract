@@ -29,7 +29,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.10.5:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.simpleframework:simple-transport:6.0.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.simpleframework:simple-http:6.0.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.simpleframework:simple-common:6.0.1:jar" level="project" />
     <orderEntry type="module" module-name="common" exported="" />
     <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-annotations:2.3.0:jar" level="project" />
     <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-core:2.3.1:jar" level="project" />
@@ -51,15 +53,6 @@
     <orderEntry type="library" scope="TEST" name="SBT: org.scalatest:scalatest_2.10:2.1.3:jar" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="SBT: javax.servlet:servlet-api:2.5:jar" level="project" />
     <orderEntry type="module" module-name="http" exported="" />
-    <orderEntry type="module-library">
-      <library name="SBT: unmanaged-jars">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../http/lib/simplyscala-server_2.10-0.6-SNAPSHOT.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="library" name="SBT: org.simpleframework:simple:5.1.5:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.10.5:jar" level="project" />
   </component>
 </module>
