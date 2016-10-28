@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuite hostname="Ievgens-MacBook-Air.local" name="qa.dummy.DummyCreatorTest" tests="43" errors="0" failures="0" time="0.42">
+                     <properties>
+      <property name="jline.esc.timeout" value="0"/><property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/><property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib"/><property name="java.vm.version" value="25.92-b14"/><property name="user.country.format" value="NL"/><property name="gopherProxySet" value="false"/><property name="java.vm.vendor" value="Oracle Corporation"/><property name="java.vendor.url" value="http://java.oracle.com/"/><property name="path.separator" value=":"/><property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/><property name="file.encoding.pkg" value="sun.io"/><property name="user.country" value="US"/><property name="sun.java.launcher" value="SUN_STANDARD"/><property name="sun.os.patch.level" value="unknown"/><property name="java.vm.specification.name" value="Java Virtual Machine Specification"/><property name="user.dir" value="/Users/ievgen/github/teddy_contract"/><property name="java.runtime.version" value="1.8.0_92-b14"/><property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment"/><property name="java.endorsed.dirs" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/endorsed"/><property name="os.arch" value="x86_64"/><property name="java.io.tmpdir" value="/var/folders/1j/vw42dmsn13j119qmd1grs5j80000gn/T/"/><property name="line.separator" value="
+"/><property name="java.vm.specification.vendor" value="Oracle Corporation"/><property name="os.name" value="Mac OS X"/><property name="sun.jnu.encoding" value="UTF-8"/><property name="java.library.path" value="/Users/ievgen/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/><property name="java.specification.name" value="Java Platform API Specification"/><property name="java.class.version" value="52.0"/><property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/><property name="os.version" value="10.12.1"/><property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/><property name="user.home" value="/Users/ievgen"/><property name="user.timezone" value="Europe/Amsterdam"/><property name="java.awt.printerjob" value="sun.lwawt.macosx.CPrinterJob"/><property name="file.encoding" value="UTF-8"/><property name="java.specification.version" value="1.8"/><property name="java.class.path" value="/usr/local/Cellar/sbt/0.13.11/libexec/sbt-launch.jar"/><property name="user.name" value="ievgen"/><property name="jline.shutdownhook" value="false"/><property name="java.vm.specification.version" value="1.8"/><property name="sun.java.command" value="/usr/local/Cellar/sbt/0.13.11/libexec/sbt-launch.jar dummy/test"/><property name="java.home" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre"/><property name="sun.arch.data.model" value="64"/><property name="user.language" value="en"/><property name="java.specification.vendor" value="Oracle Corporation"/><property name="awt.toolkit" value="sun.lwawt.macosx.LWCToolkit"/><property name="java.vm.info" value="mixed mode"/><property name="java.version" value="1.8.0_92"/><property name="java.ext.dirs" value="/Users/ievgen/Library/Java/Extensions:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/ext:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java"/><property name="sun.boot.class.path" value="/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/sunrsasign.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/jre/classes"/><property name="java.vendor" value="Oracle Corporation"/><property name="file.separator" value="/"/><property name="java.vendor.url.bug" value="http://bugreport.sun.com/bugreport/"/><property name="sun.io.unicode.encoding" value="UnicodeBig"/><property name="sun.cpu.endian" value="little"/><property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/><property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/><property name="sun.cpu.isalist" value=""/>
+    </properties>
+                     <testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByBody: scenarios: null, content: null" time="0.027">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByBody: scenarios: empty, content: null" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByBody: scenarios: nonEmpty(no body), content: null" time="0.005">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByBody: scenarios: nonEmpty(body), content: null" time="0.266">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByBody: scenarios: nonEmpty(no body), content: empty" time="0.0">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByBody: scenarios: nonEmpty(body), content: empty" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByBody: scenarios: nonEmpty(no body), content: nonEmpty" time="0.0">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByBody: scenarios: nonEmpty(body), content: nonEmpty don't fit" time="0.04">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByBody: scenarios: nonEmpty(body), content: nonEmpty fit one" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByBody: scenarios: nonEmpty(body), content: nonEmpty fit multi" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByQuery scenarios: null; query: null" time="0.002">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByQuery scenarios: empty; query: null" time="0.002">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByQuery scenarios: nonEmpty(no query); query: null" time="0.002">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByQuery scenarios: nonEmpty(query); query: null" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByQuery scenarios: nonEmpty(no query); query: empty" time="0.0">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByQuery scenarios: nonEmpty(query); query: empty" time="0.0">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByQuery scenarios: nonEmpty(no query); query: nonEmpty" time="0.002">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByQuery scenarios: nonEmpty(query); query: nonEmpty don't fit" time="0.002">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByQuery scenarios: nonEmpty(query); query: nonEmpty fit one" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByQuery scenarios: nonEmpty(query); query: nonEmpty fit multi" time="0.0">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByHeaders headers empty" time="0.002">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByHeaders headers null" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByHeaders headers null not match request headers" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByHeaders headers empty not match request headers" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="filterScenariosByHeaders match" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="findRequiredScenario headers null" time="0.002">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="findRequiredScenario headers null with missing required request header any value" time="0.003">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="findRequiredScenario headers null with missing required request header exact value" time="0.0">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="findRequiredScenario with required request header any value" time="0.003">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="findRequiredScenario with missing required request header exact value" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="parseBody null" time="0.0">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="parseBody String" time="0.02">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="parseBody Map" time="0.003">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="parseBody List" time="0.004">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="parseBody inner file reference" time="0.013">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="parseBody not existing inner file reference" time="0.002">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="validateRoute invalid path empty" time="0.002">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="validateRoute invalid path starts not from \" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="validateRoute valid path starts from **" time="0.003">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="validateRoute invalid method empty" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="validateRoute invalid method not supported" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="validateRoute empty scenarios" time="0.001">
+                                                 
+                                               </testcase><testcase classname="qa.dummy.DummyCreatorTest" name="validateRoute" time="0.0">
+                                                 
+                                               </testcase>
+                     <system-out></system-out>
+                     <system-err></system-err>
+                   </testsuite>

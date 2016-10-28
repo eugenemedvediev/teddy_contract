@@ -1,0 +1,18 @@
+[0m[[0minfo[0m] [0m[32mDummyCreatorIntegrationTest:[0m[0m
+[0m[[0minfo[0m] [0m[32m- multiple required values[0m[0m
+[0m[[0minfo[0m] [0m[32m- missing header from multiple required values[0m[0m
+[0m[[0minfo[0m] [0m[32m- missing header[0m[0m
+[0m[[0minfo[0m] [0m[32m- header with not expected value[0m[0m
+[0m[[0minfo[0m] [0m[32m- correct required header with value[0m[0m
+[0m[[0minfo[0m] [0m[32m- text/plain body[0m[0m
+[0m[[0minfo[0m] [0m[32m- not match body[0m[0m
+[0m[[0minfo[0m] [0m[32m- failure read from file[0m[0m
+[0m[[0minfo[0m] [0m[32m- correct required header without value[0m[0m
+[0m[[0minfo[0m] [0m[32m- missing route scenarios[0m[0m
+[0m[[0minfo[0m] [0m[32m- missing query param empty[0m[0m
+[0m[[0minfo[0m] [0m[32m- missing query param not fit[0m[0m
+[0m[[0minfo[0m] [0m[32m- query param different value[0m[0m
+[0m[[0minfo[0m] [0m[32m- no scenarios with specified query[0m[0m
+[0m[[0minfo[0m] [0m[32m- query param any value[0m[0m
+[0m[[0minfo[0m] [0m[32m- query param exact value[0m[0m
+[0m[[0minfo[0m] [0m[32m- path params[0m[0m
