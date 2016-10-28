@@ -2,7 +2,7 @@ package qa.dummy
 
 import java.net.URL
 
-import fr.simply.StubServer
+import nl.medvediev.apiserver.APIServer
 import org.json4s.jackson.JsonMethods._
 import org.scalatest.FunSuite
 import qa.common.exception.ConfigurationException
@@ -73,9 +73,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("""{"input":"data"}""", MediaType.APPLICATION_JSON)
@@ -150,9 +150,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
@@ -206,9 +206,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("{}", MediaType.APPLICATION_JSON)
@@ -261,9 +261,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("{}", MediaType.APPLICATION_JSON)
@@ -335,9 +335,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
@@ -387,9 +387,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
@@ -442,9 +442,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("""{"notsome":"body"}""", MediaType.APPLICATION_JSON)
@@ -496,9 +496,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("""{"some":"body"}""", MediaType.APPLICATION_JSON)
@@ -570,9 +570,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
@@ -658,9 +658,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
@@ -725,9 +725,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
@@ -792,9 +792,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
@@ -842,9 +842,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
@@ -909,9 +909,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
@@ -977,9 +977,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("", MediaType.APPLICATION_JSON)
@@ -1024,9 +1024,9 @@ class DummyCreatorIntegrationTest extends FunSuite {
         |]
       """
         .stripMargin).extract[List[Route]]
-    val workingServer: StubServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, new Configuration("any", api))
     workingServer.start
-    val port = workingServer.portInUse
+    val port = workingServer.getPort
     val url = s"http://localhost:$port"
     val httpClient = new HttpClient
     val requestBody = RequestBody("", MediaType.APPLICATION_JSON)

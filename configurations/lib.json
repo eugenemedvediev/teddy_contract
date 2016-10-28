@@ -3,7 +3,7 @@
   "api": [
     {
       "method": "GET",
-      "path": "/**city/*/book/*",
+      "path": "/city/*/book/*",
       "scenarios": [
         {
           "name": "ok",
