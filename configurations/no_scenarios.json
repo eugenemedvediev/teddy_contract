@@ -1,0 +1,9 @@
+{
+  "description":"any",
+  "api": [
+    {
+      "method":"POST",
+      "path":"/smth"
+    }
+  ]
+}

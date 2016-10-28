@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id="dummy" external.linked.project.path="$MODULE_DIR$/../../dummy" external.root.project.path="$MODULE_DIR$/../.." external.system.id="SBT" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_7" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/../../dummy/target/scala-2.10/classes" />
+    <output-test url="file://$MODULE_DIR$/../../dummy/target/scala-2.10/test-classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../dummy">
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/src/main/scala" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/src/main/scala-2.10" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/target/scala-2.10/src_managed/main" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/src/it/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/src/it/scala" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/src/it/scala-2.10" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/src/test/scala" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/src/test/scala-2.10" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/target/scala-2.10/src_managed/it" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/target/scala-2.10/src_managed/test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/target/scala-2.10/resource_managed/main" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/src/it/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/src/test/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/target/scala-2.10/resource_managed/it" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/../../dummy/target/scala-2.10/resource_managed/test" type="java-test-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/../../dummy/target/one-jar-redist" />
+      <excludeFolder url="file://$MODULE_DIR$/../../dummy/target/resolution-cache" />
+      <excludeFolder url="file://$MODULE_DIR$/../../dummy/target/streams" />
+      <excludeFolder url="file://$MODULE_DIR$/../../dummy/target/test-reports" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="common" exported="" />
+    <orderEntry type="library" name="SBT: org.simpleframework:simple-transport:6.0.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.simpleframework:simple-http:6.0.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.simpleframework:simple-common:6.0.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-annotations:2.3.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-core:2.3.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.fasterxml.jackson.core:jackson-databind:2.3.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.thoughtworks.paranamer:paranamer:2.6:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.json4s:json4s-ast_2.10:3.2.11:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.json4s:json4s-core_2.10:3.2.11:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.json4s:json4s-jackson_2.10:3.2.11:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scala-compiler:2.10.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scalap:2.10.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scala-reflect:2.10.0:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: org.scala-lang:scala-reflect:2.10.3:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: org.scalatest:scalatest_2.10:2.1.3:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: antlr:antlr:2.7.7:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: com.pyruby:java-stub-server:0.12:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: com.sdicons.jsontools:jsontools-core:1.7:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: javax.servlet.jsp:jsp-api:2.1:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: joda-time:joda-time:2.7:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: org.joda:joda-convert:1.7:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: org.mortbay.jetty:jetty:6.1.26:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: org.mortbay.jetty:jetty-embedded:6.1.26:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: org.mortbay.jetty:jetty-sslengine:6.1.26:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: org.mortbay.jetty:jetty-util:6.1.26:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: org.mortbay.jetty:servlet-api:2.5.20110712:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: org.slf4j:slf4j-api:1.7.5:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="SBT: uk.co.bigbeeconsultants:bee-client_2.10:0.28.0:jar" level="project" />
+    <orderEntry type="module" module-name="http" exported="" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.10.5:jar" level="project" />
+  </component>
+</module>

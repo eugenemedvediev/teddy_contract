@@ -1,0 +1,24 @@
+{
+  "description": "Library",
+  "api": [
+    {
+      "method": "GET",
+      "path": "/city/*/book/*",
+      "scenarios": [
+        {
+          "name": "ok",
+          "response": {
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "parent": "${*0}",
+              "child": "${*1}"
+            },
+            "code": 200
+          }
+        }
+      ]
+    }
+  ]
+}

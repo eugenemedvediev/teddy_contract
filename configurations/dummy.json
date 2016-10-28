@@ -3,19 +3,13 @@
   "api": [
     {
       "method": "POST",
-      "path": "/wires/servers",
+      "path": "/wires/servers/",
       "scenarios": [
         {
-          "name": "ok",
+          "name": "Required Authorization header",
           "request": {
             "headers": {
-              "Content-Type": "application/json",
-              "Accept": "application/json",
-              "Authorization": "Token blablabla"
-            },
-            "body": {
-              "server": "Angel",
-              "description": "Angel Server Description"
+              "!Authorization": null
             }
           },
           "response": {
@@ -23,11 +17,28 @@
               "Content-Type": "application/json"
             },
             "body": {
-              "id": 1,
-              "server": "Angel",
-              "description": "Angel Server Description",
-              "port": 8090
+              "error": "Authorization header is missing"
             },
+            "code": 400
+          }
+        },
+        {
+          "name": "ok",
+          "request": {
+            "headers": {
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            "body": {
+              "server": "name",
+              "description": "Angel Server Description"
+            }
+          },
+          "response": {
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": "@/Users/ievgen/github/teddy_contract/configurations/scenario.json",
             "code": 200
           }
         },
@@ -36,8 +47,7 @@
           "request": {
             "headers": {
               "Content-Type": "application/json",
-              "Accept": "application/json",
-              "Authorization": "Token blablabla"
+              "Accept": "application/json"
             },
             "body": {
               "description": "Angel Server Description"
