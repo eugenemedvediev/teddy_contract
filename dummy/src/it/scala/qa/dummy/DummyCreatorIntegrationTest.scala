@@ -93,7 +93,7 @@ class DummyCreatorIntegrationTest extends FunSuite {
 
     // then
     assert(response.status.code == 200)
-    assert(response.body.isTextual == true)
+    assert(response.body.isTextual)
     assert((parse(response.body.asString) \\ "message").extract[String] == "match header")
   }
 
@@ -225,6 +225,246 @@ class DummyCreatorIntegrationTest extends FunSuite {
     // then
     assert(response.status.code == 400)
     assert((parse(response.body.asString) \\ "error").extract[String] == "Authorization header is missing")
+  }
+
+  test("configuration route json") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+         |[
+         |    {
+         |      "method": "GET",
+         |      "path": "/test",
+         |      "scenarios": [
+         |        {
+         |          "name": "ok",
+         |          "response": {
+         |            "headers": {
+         |              "Content-Type": "application/json"
+         |            },
+         |            "body": {
+         |              "id": 1,
+         |              "key": "value"
+         |            },
+         |            "code": 200
+         |          }
+         |        }
+         |      ]
+         |    }
+         |  ]
+              """
+        .stripMargin).extract[List[Route]]
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, Configuration("any", api))
+    workingServer.start
+    val port = workingServer.getPort
+    val url = s"http://localhost:$port/_dummy_"
+    val httpClient = new HttpClient
+
+    // when
+    val response = httpClient.get(
+      new URL(url),
+      Headers(Map(
+        "Accept" -> "application/json"
+      ))
+    )
+
+    // then
+    assert(response.status.code == 200)
+    assert(parse(response.body.asString) == parse(
+      """{
+        |    "description": "any",
+        |    "api": [
+        |        {
+        |            "method": "GET",
+        |            "path": "/test",
+        |            "scenarios": [
+        |                {
+        |                    "name": "ok",
+        |                    "request": {
+        |                        "query": {
+        |                        },
+        |                        "headers": {
+        |                        },
+        |                        "body": null
+        |                    },
+        |                    "response": {
+        |                        "headers": {
+        |                            "Content-Type": "application/json"
+        |                        },
+        |                        "body": {
+        |                            "id": 1,
+        |                            "key": "value"
+        |                        },
+        |                        "code": 200
+        |                    }
+        |                }
+        |            ]
+        |        }
+        |    ]
+        |}
+        |
+      """.stripMargin))
+  }
+
+  test("configuration route html") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+        |[
+        |    {
+        |      "method": "GET",
+        |      "path": "/test",
+        |      "scenarios": [
+        |        {
+        |          "name": "ok",
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "id": 1,
+        |              "key": "value"
+        |            },
+        |            "code": 200
+        |          }
+        |        }
+        |      ]
+        |    }
+        |  ]
+      """
+        .stripMargin).extract[List[Route]]
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, Configuration("any", api))
+    workingServer.start
+    val port = workingServer.getPort
+    val url = s"http://localhost:$port/_dummy_"
+    val httpClient = new HttpClient
+
+
+    // when
+    val response = httpClient.get(
+      new URL(url),
+      Headers(Map(
+        "Accept" -> "text/html"
+      ))
+    )
+
+    // then
+    assert(response.status.code == 200)
+    assert(response.body.asString ==
+      """
+        |<!DOCTYPE html>
+        |<html>
+        |<head>
+        |<title>Dummy Server</title>
+        |</head>
+        |<body>
+        |<h1>any</h1>
+        |<h3>Routes:<h3>
+        |<ul>
+        |<li>/test - GET</li></ul>
+        |<h3>Configuration:</h3>
+        |<pre><code>[ {
+        |  "method" : "GET",
+        |  "path" : "/test",
+        |  "scenarios" : [ {
+        |    "name" : "ok",
+        |    "request" : {
+        |      "query" : { },
+        |      "headers" : { },
+        |      "body" : null
+        |    },
+        |    "response" : {
+        |      "headers" : {
+        |        "Content-Type" : "application/json"
+        |      },
+        |      "body" : {
+        |        "id" : 1,
+        |        "key" : "value"
+        |      },
+        |      "code" : 200
+        |    }
+        |  } ]
+        |} ]</code></pre>
+        |
+        |</body>
+        |</html>
+        |        """.stripMargin)
+
+  }
+
+  test("configuration route text") {
+    // given
+    implicit lazy val formats = org.json4s.DefaultFormats
+    val api: List[Route] = parse(
+      """
+        |[
+        |    {
+        |      "method": "GET",
+        |      "path": "/test",
+        |      "scenarios": [
+        |        {
+        |          "name": "ok",
+        |          "response": {
+        |            "headers": {
+        |              "Content-Type": "application/json"
+        |            },
+        |            "body": {
+        |              "id": 1,
+        |              "key": "value"
+        |            },
+        |            "code": 200
+        |          }
+        |        }
+        |      ]
+        |    }
+        |  ]
+      """
+        .stripMargin).extract[List[Route]]
+    val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, Configuration("any", api))
+    workingServer.start
+    val port = workingServer.getPort
+    val url = s"http://localhost:$port/_dummy_"
+    val httpClient = new HttpClient
+
+
+    // when
+    val response = httpClient.get(
+      new URL(url),
+      Headers(Map(
+        "Accept" -> "plain/text"
+      ))
+    )
+
+    // then
+    assert(response.status.code == 200)
+    assert(response.body.asString ==
+      """{
+        |  "description" : "any",
+        |  "api" : [ {
+        |    "method" : "GET",
+        |    "path" : "/test",
+        |    "scenarios" : [ {
+        |      "name" : "ok",
+        |      "request" : {
+        |        "query" : { },
+        |        "headers" : { },
+        |        "body" : null
+        |      },
+        |      "response" : {
+        |        "headers" : {
+        |          "Content-Type" : "application/json"
+        |        },
+        |        "body" : {
+        |          "id" : 1,
+        |          "key" : "value"
+        |        },
+        |        "code" : 200
+        |      }
+        |    } ]
+        |  } ]
+        |}""".stripMargin)
   }
 
   test("header with not expected value") {
