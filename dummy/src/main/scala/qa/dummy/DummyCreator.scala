@@ -246,7 +246,7 @@ object DummyCreator {
     val list = filterScenarioByMap(scenarios, (s: Scenario) => s.request.headers, headers)
 
     if (list.isEmpty) {
-      throw new ContractException("no any scenarios with specified header")
+      throw ContractException("no any scenarios with specified header")
     }
     list
   }
@@ -258,7 +258,7 @@ object DummyCreator {
 
     val list = filterScenarioByMap(scenarios, (s: Scenario) => s.request.query, query)
     if (list.isEmpty) {
-      throw new ContractException("no any scenarios with specified query")
+      throw ContractException("no any scenarios with specified query")
     }
     list
   }
@@ -269,7 +269,7 @@ object DummyCreator {
 
     val list = scenarios.filter(bodyCondition(content))
     if (list.isEmpty) {
-      throw new ContractException("no any scenarios with specified body")
+      throw ContractException("no any scenarios with specified body")
     }
     list
   }
