@@ -1,0 +1,24 @@
+{
+  "description": "any",
+  "api": [
+    {
+      "method": "GET",
+      "path": "/test",
+      "scenarios": [
+        {
+          "name": "ok",
+          "response": {
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "id": 1,
+              "key": "value"
+            },
+            "code": 200
+          }
+        }
+      ]
+    }
+  ]
+}
