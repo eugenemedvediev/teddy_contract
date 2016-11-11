@@ -8,7 +8,7 @@ resolvers += "Big Bee Consultants" at "http://bigbeeconsultants.co.uk/repo"
 val json4s = "org.json4s" %% "json4s-jackson" % "3.2.11"
 val configs = "com.github.kxbmap" %% "configs" % "0.2.2"
 val apacheClient = "org.apache.httpcomponents" % "httpclient" % "4.3.6"
-val javaServlet = "javax.servlet" % "servlet-api" % "2.5" % "provided"
+val javaServlet = "javax.boot" % "boot-api" % "2.5" % "provided"
 val scalatest = "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test"
 val beeclientit = "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0" % "it"
 val slf4j = "org.slf4j" % "slf4j-api" % "1.7.12"
@@ -54,24 +54,24 @@ lazy val common = (project in file("common")).
     exportJars := true
   )
 
-lazy val scenario = (project in file("scenario")).
-  settings(commonSettings: _*).
-  settings(
-    name := "scenario",
-    libraryDependencies ++= Seq(
-      configs,
-      apacheClient,
-      javaServlet,
-      "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test,it"
-    ),
-    Defaults.itSettings,
-    testOptions in IntegrationTest += Tests.Filter(itTestFilter),
-    parallelExecution in IntegrationTest := true,
-    oneJarSettings,
-    mainClass in oneJar := Some("qa.scenario.ScenarioServer")
-  ).
-  configs(IntegrationTest).
-  dependsOn(common, http)
+//lazy val scenario = (project in file("scenario")).
+//  settings(commonSettings: _*).
+//  settings(
+//    name := "scenario",
+//    libraryDependencies ++= Seq(
+//      configs,
+//      apacheClient,
+//      javaServlet,
+//      "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test,it"
+//    ),
+//    Defaults.itSettings,
+//    testOptions in IntegrationTest += Tests.Filter(itTestFilter),
+//    parallelExecution in IntegrationTest := true,
+//    oneJarSettings,
+//    mainClass in oneJar := Some("qa.scenario.ScenarioServer")
+//  ).
+//  configs(IntegrationTest).
+//  dependsOn(common, http)
 
 lazy val dummy = (project in file("dummy")).
   settings(commonSettings: _*).
@@ -79,14 +79,27 @@ lazy val dummy = (project in file("dummy")).
   settings(
     name := "dummy",
     libraryDependencies ++= Seq(
-      "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0" % "it" excludeAll(ExclusionRule(organization = "org.scalatest"), ExclusionRule(organization = "javax.servlet")),
-      "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test,it"
+      "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0" % "it" excludeAll(ExclusionRule(organization = "org.scalatest"), ExclusionRule(organization = "javax.boot")),
+      "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test,it",
+      "io.spray" % "spray-can" % "1.1-M8",
+      "io.spray" % "spray-http" % "1.1-M8",
+      "io.spray" % "spray-routing" % "1.1-M8",
+      "net.liftweb" %% "lift-json" % "2.5.1",
+      "com.typesafe.slick" %% "slick" % "1.0.1",
+      "mysql" % "mysql-connector-java" % "5.1.25",
+      "com.typesafe.akka" %% "akka-actor" % "2.1.4",
+      "com.typesafe.akka" %% "akka-slf4j" % "2.1.4",
+      "ch.qos.logback" % "logback-classic" % "1.0.13"
+    ),
+    resolvers ++= Seq(
+      "Spray repository" at "http://repo.spray.io",
+      "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
     ),
     Defaults.itSettings,
     testOptions in IntegrationTest += Tests.Filter(itTestFilter),
     parallelExecution in IntegrationTest := true,
     oneJarSettings,
-    mainClass in oneJar := Some("qa.dummy.DummyServer"),
+    mainClass in oneJar := Some("qa.dummy.boot.DummyBoot"),
     dockerfile in docker := {
       val jarFile = (artifactPath in oneJar).value
       val appDirPath = "/app"
