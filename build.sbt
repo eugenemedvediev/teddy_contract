@@ -3,7 +3,6 @@ import sbt._
 import sbt.Keys._
 
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
-
 resolvers += "Big Bee Consultants" at "http://bigbeeconsultants.co.uk/repo"
 
 val json4s = "org.json4s" %% "json4s-jackson" % "3.2.11"
@@ -15,7 +14,6 @@ val beeclientit = "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0" % "it"
 val slf4j = "org.slf4j" % "slf4j-api" % "1.7.12"
 val logbackcore = "ch.qos.logback" % "logback-core" % "1.1.3"
 val logbackclassic = "ch.qos.logback" % "logback-classic" % "1.1.3"
-//val elasticsearch = "com.sksamuel.elastic4s" %% "elastic4s" % "1.1.2.0"
 
 val itTestFilter: String => Boolean = { name =>
   (name endsWith "ItTest") || (name endsWith "IntegrationTest")
@@ -28,7 +26,6 @@ lazy val commonSettings = Seq(
 )
 
 lazy val apiserver = (project in file("apiserver")).
-//  settings(commonSettings: _*).
   settings(
     libraryDependencies ++= Seq(
       "org.simpleframework" % "simple-http" % "6.0.1",
@@ -43,14 +40,8 @@ lazy val http = (project in file("http")).
   settings(commonSettings: _*).
   settings(
     libraryDependencies ++= Seq(
-      ////      pathmatcher
-      ////      simplyscala
     ),
-    //    unmanagedBase <<= baseDirectory { base => base / "../lib" }
-    //,
-    //    unmanagedJars in Compile += file("../lib/apiserver_2.10-0.0.1-one-jar.jar")
-    exportJars := true//,
-//    retrieveManaged := true
+    exportJars := true
   ).
   dependsOn(apiserver)
 
@@ -66,10 +57,8 @@ lazy val common = (project in file("common")).
 lazy val scenario = (project in file("scenario")).
   settings(commonSettings: _*).
   settings(
+    name := "scenario",
     libraryDependencies ++= Seq(
-//      simpleframework,
-      //      simplyscala,
-      json4s,
       configs,
       apacheClient,
       javaServlet,
@@ -84,23 +73,34 @@ lazy val scenario = (project in file("scenario")).
   configs(IntegrationTest).
   dependsOn(common, http)
 
-
 lazy val dummy = (project in file("dummy")).
   settings(commonSettings: _*).
+  enablePlugins(DockerPlugin).
   settings(
+    name := "dummy",
     libraryDependencies ++= Seq(
-//      simpleframework,
-      //      simplyscala,
-      json4s,
       "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0" % "it" excludeAll(ExclusionRule(organization = "org.scalatest"), ExclusionRule(organization = "javax.servlet")),
       "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test,it"
     ),
     Defaults.itSettings,
     testOptions in IntegrationTest += Tests.Filter(itTestFilter),
     parallelExecution in IntegrationTest := true,
-    //    unmanagedBase <<= baseDirectory { base => base / "../lib" },
     oneJarSettings,
-    mainClass in oneJar := Some("qa.dummy.DummyServer")
+    mainClass in oneJar := Some("qa.dummy.DummyServer"),
+    dockerfile in docker := {
+      val jarFile = (artifactPath in oneJar).value
+      val appDirPath = "/app"
+      val jarTargetPath = s"$appDirPath/dummy.jar"
+      val configTargetPath = s"$appDirPath/config.json"
+      print(s"classpath: ${(resourceDirectory in Compile).value / "test.json"}")
+      new Dockerfile {
+        from("java")
+        add(jarFile, jarTargetPath)
+        add((resourceDirectory in Compile).value / "test.json", configTargetPath)
+        expose(8090)
+        entryPoint("java", "-jar", jarTargetPath, configTargetPath)
+      }
+    }
   ).
   configs(IntegrationTest).
   dependsOn(common, http)
