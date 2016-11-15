@@ -107,7 +107,7 @@ lazy val dummy = (project in file("dummy")).
       new Dockerfile {
         from("java")
         add(jarFile, jarTargetPath)
-        expose(8080)
+        expose( (8080 to 8100):_* )
         entryPoint("java", "-jar", jarTargetPath)
       }
     }

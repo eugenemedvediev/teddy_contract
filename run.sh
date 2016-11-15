@@ -1,4 +1,3 @@
 #!/usr/bin/env bash
 
-echo $1
-docker run -d -p 8080 $1
+docker run -d -p 8080-8100:8080-8100 com.github.eugenemedvediev/dummy:latest
