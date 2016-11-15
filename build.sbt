@@ -104,14 +104,11 @@ lazy val dummy = (project in file("dummy")).
       val jarFile = (artifactPath in oneJar).value
       val appDirPath = "/app"
       val jarTargetPath = s"$appDirPath/dummy.jar"
-      val configTargetPath = s"$appDirPath/config.json"
-      print(s"classpath: ${(resourceDirectory in Compile).value / "test.json"}")
       new Dockerfile {
         from("java")
         add(jarFile, jarTargetPath)
-        add((resourceDirectory in Compile).value / "test.json", configTargetPath)
-        expose(8090)
-        entryPoint("java", "-jar", jarTargetPath, configTargetPath)
+        expose(8080)
+        entryPoint("java", "-jar", jarTargetPath)
       }
     }
   ).

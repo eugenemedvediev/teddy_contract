@@ -1,6 +1,7 @@
 package qa.dummy.boot
 
 import akka.actor.{ActorSystem, Props}
+import akka.event.slf4j.SLF4JLogging
 import akka.io.IO
 import qa.dummy.config.AppConfiguration
 import qa.dummy.rest.RestServiceActor
@@ -9,9 +10,9 @@ import spray.can.Http
 /**
   * Created by ievgen on 11/11/2016.
   */
-class DummyBoot extends App with AppConfiguration {
+object DummyBoot extends App with AppConfiguration  with SLF4JLogging {
     // create an actor system for application
-    println("YO")
+    log.info("YO")
     implicit val system = ActorSystem("rest-service-example")
 
     // create and start rest service actor
