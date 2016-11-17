@@ -7,7 +7,7 @@ import qa.dummy.config.AppConfiguration
 import qa.dummy.rest.RestServiceActor
 import spray.can.Http
 
-object DummyBoot extends App with AppConfiguration  with SLF4JLogging {
+object Main extends App with AppConfiguration  with SLF4JLogging {
     implicit val system = ActorSystem("servers")
     val restService = system.actorOf(Props[RestServiceActor], "servers")
     IO(Http) ! Http.Bind(restService, interface, port)

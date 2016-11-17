@@ -20,7 +20,7 @@ val itTestFilter: String => Boolean = { name =>
 }
 
 lazy val commonSettings = Seq(
-  organization := "com.github.eugenemedvediev",
+  organization := "nl.medvediev",
   version := "0.0.1",
   scalaVersion := "2.10.5"
 )
@@ -75,9 +75,10 @@ lazy val common = (project in file("common")).
 
 lazy val dummy = (project in file("dummy")).
   settings(commonSettings: _*).
-  enablePlugins(DockerPlugin).
+  enablePlugins(JavaAppPackaging).
   settings(
-    name := "dummy",
+    name := "api-contract",
+    version := "0.0.1",
     libraryDependencies ++= Seq(
       "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0" % "it" excludeAll(ExclusionRule(organization = "org.scalatest"), ExclusionRule(organization = "javax.boot")),
       "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test,it",
@@ -98,19 +99,11 @@ lazy val dummy = (project in file("dummy")).
     Defaults.itSettings,
     testOptions in IntegrationTest += Tests.Filter(itTestFilter),
     parallelExecution in IntegrationTest := true,
-    oneJarSettings,
-    mainClass in oneJar := Some("qa.dummy.boot.DummyBoot"),
-    dockerfile in docker := {
-      val jarFile = (artifactPath in oneJar).value
-      val appDirPath = "/app"
-      val jarTargetPath = s"$appDirPath/dummy.jar"
-      new Dockerfile {
-        from("java")
-        add(jarFile, jarTargetPath)
-        expose( (8080 to 8100):_* )
-        entryPoint("java", "-jar", jarTargetPath)
-      }
-    }
+    Revolver.settings,
+    mainClass in Compile := Some("qa.dummy.boot.Main"),
+    packageName in Docker := packageName.value,
+    dockerRepository := Some("imedvediev"),
+    dockerExposedPorts := (8080 to 8100).toSeq
   ).
   configs(IntegrationTest).
   dependsOn(common, http)
