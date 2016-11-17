@@ -20,7 +20,7 @@ object Methods {
     "POST" -> aPost,
     "PUT" -> aPut,
     "PATCH" -> aPatch,
-    "GET" -> aGet
+    "GET" -> aGet,
     "DELETE" -> aDelete,
     "OPTIONS" -> aOptions
   )

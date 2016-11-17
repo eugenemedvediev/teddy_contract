@@ -34,7 +34,7 @@ trait RestService extends HttpService with SLF4JLogging {
   implicit val executionContext = actorRefFactory.dispatcher
 
   val rest = respondWithMediaType(MediaTypes.`application/json`) {
-    path("servers") {
+    path("") {
       post {
         entity(Unmarshaller(MediaTypes.`application/json`) {
           case httpEntity: HttpEntity => {
