@@ -15,3 +15,19 @@ case object PostVerb extends Verb {
   override def toString: String = "POST"
 }
 
+case object PutVerb extends Verb {
+  override def toString: String = "PUT"
+}
+
+case object PatchVerb extends Verb {
+  override def toString: String = "PATCH"
+}
+
+case object DeleteVerb extends Verb {
+  override def toString: String = "DELETE"
+}
+
+case object OptionsVerb extends Verb {
+  override def toString: String = "OPTIONS"
+}
+

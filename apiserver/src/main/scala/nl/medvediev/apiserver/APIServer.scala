@@ -29,6 +29,26 @@ object POST {
     APIRoute(PostVerb, path, params, response)
 }
 
+object PUT {
+  def apply(path: String, params: Map[String, String], response: APIResponse): APIRoute =
+    APIRoute(PutVerb, path, params, response)
+}
+
+object PATCH {
+  def apply(path: String, params: Map[String, String], response: APIResponse): APIRoute =
+    APIRoute(PatchVerb, path, params, response)
+}
+
+object DELETE {
+  def apply(path: String, params: Map[String, String], response: APIResponse): APIRoute =
+    APIRoute(DeleteVerb, path, params, response)
+}
+
+object OPTIONS {
+  def apply(path: String, params: Map[String, String], response: APIResponse): APIRoute =
+    APIRoute(OptionsVerb, path, params, response)
+}
+
 class APIServer(initPort: Int, routes: List[APIRoute]) {
   private var defaultResponse = SimpleAPIResponse(404, "application/json", "not found")
 
