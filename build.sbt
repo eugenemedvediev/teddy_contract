@@ -103,7 +103,7 @@ lazy val dummy = (project in file("dummy")).
     mainClass in Compile := Some("qa.dummy.boot.Main"),
     packageName in Docker := packageName.value,
     dockerRepository := Some("imedvediev"),
-    dockerExposedPorts := (8080 to 8100).toSeq
+    dockerExposedPorts := Seq(8080)
   ).
   configs(IntegrationTest).
   dependsOn(common, http)
