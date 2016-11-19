@@ -8,4 +8,4 @@ resolvers ++= Seq(
 addSbtPlugin("org.scala-sbt.plugins" % "sbt-onejar" % "0.8")
 addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.4.0")
 addSbtPlugin("io.spray" %% "sbt-revolver" % "0.8.0")
-addSbtPlugin("com.typesafe.sbt" %% "sbt-native-packager" % "1.1.0-RC1")
+addSbtPlugin("com.typesafe.sbt" %% "sbt-native-packager" % "1.2.0-M7")

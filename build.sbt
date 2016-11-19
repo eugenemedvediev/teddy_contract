@@ -112,5 +112,5 @@ lazy val teddy_contract = (project in file(".")).
   settings(
     name := "teddy_contract"
   ).
-  aggregate(dummy)
-//  aggregate(dummy, scenario)
+  dependsOn(dummy).aggregate(dummy)
+  //.dependsOn(scenario).aggregate(scenario)
