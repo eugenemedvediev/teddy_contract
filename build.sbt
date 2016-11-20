@@ -1,6 +1,5 @@
-import com.github.retronym.SbtOneJar._
-import sbt._
 import sbt.Keys._
+import sbt._
 
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 resolvers += "Big Bee Consultants" at "http://bigbeeconsultants.co.uk/repo"
@@ -14,6 +13,7 @@ val beeclientit = "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0" % "it"
 val slf4j = "org.slf4j" % "slf4j-api" % "1.7.12"
 val logbackcore = "ch.qos.logback" % "logback-core" % "1.1.3"
 val logbackclassic = "ch.qos.logback" % "logback-classic" % "1.1.3"
+val elasticsearch = "com.sksamuel.elastic4s" %% "elastic4s" % "1.1.2.0"
 
 val itTestFilter: String => Boolean = { name =>
   (name endsWith "ItTest") || (name endsWith "IntegrationTest")
@@ -32,7 +32,7 @@ lazy val apiserver = (project in file("apiserver")).
       "org.simpleframework" % "simple-transport" % "6.0.1",
       "org.scalatest" %% "scalatest" % "2.2.6" % "test",
       "com.typesafe.play" % "play-ws_2.10" % "2.4.6" % "test"
-      ),
+    ),
     exportJars := true
   )
 
@@ -80,6 +80,7 @@ lazy val dummy = (project in file("dummy")).
     name := "api-contract",
     version := "0.0.1",
     libraryDependencies ++= Seq(
+      elasticsearch,
       "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0" % "it" excludeAll(ExclusionRule(organization = "org.scalatest"), ExclusionRule(organization = "javax.boot")),
       "org.scalatest" % "scalatest_2.10" % "2.1.3" % "test,it",
       "io.spray" % "spray-can" % "1.1-M8",
@@ -113,4 +114,4 @@ lazy val teddy_contract = (project in file(".")).
     name := "teddy_contract"
   ).
   dependsOn(dummy).aggregate(dummy)
-  //.dependsOn(scenario).aggregate(scenario)
+//.dependsOn(scenario).aggregate(scenario)

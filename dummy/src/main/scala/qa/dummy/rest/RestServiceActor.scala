@@ -3,15 +3,13 @@ package qa.dummy.rest
 
 import akka.actor.Actor
 import akka.event.slf4j.SLF4JLogging
-import java.text.{ParseException, SimpleDateFormat}
-import java.util.Date
-
-import net.liftweb.json.Serialization._
-import net.liftweb.json.{DateFormat, Formats}
+import nl.medvediev.apiserver.APIServer
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import org.json4s.jackson.Serialization
 import qa.common.model.Configuration
 import qa.dummy.DummyCreator
+import qa.dummy.db.DB
 import spray.http._
 import spray.httpx.unmarshalling._
 import spray.routing._
@@ -19,7 +17,9 @@ import spray.routing._
 /**
   * Created by ievgen on 11/11/2016.
   */
-class RestServiceActor extends Actor with RestService {
+class RestServiceActor(dbP: DB, serversP: scala.collection.mutable.Map[String, APIServer]) extends Actor with RestService {
+  val db: DB = dbP
+  val servers: scala.collection.mutable.Map[String, APIServer] = serversP
 
   implicit def actorRefFactory = context
 
@@ -31,6 +31,8 @@ class RestServiceActor extends Actor with RestService {
   */
 trait RestService extends HttpService with SLF4JLogging {
 
+  val db: DB
+  val servers: scala.collection.mutable.Map[String, APIServer]
   implicit val executionContext = actorRefFactory.dispatcher
 
   val rest = respondWithMediaType(MediaTypes.`application/json`) {
@@ -45,14 +47,33 @@ trait RestService extends HttpService with SLF4JLogging {
         }) {
           configuration: Configuration =>
             ctx: RequestContext => {
-              val workingServer = DummyCreator.createServer(8090, configuration)
-              workingServer.start
-              val port = workingServer.getPort
-              ctx.complete(StatusCodes.OK, port.toString)
+              val server = DummyCreator.createServer(8090, configuration)
+              server.start
+              val port = server.getPort.toString
+              servers.put(port, server)
+              db.writeConfiguration(port, configuration)
+              ctx.complete(StatusCodes.OK, port)
+            }
+        }
+      } ~ get {
+        ctx: RequestContext => {
+          val configurations = db.getAllStartedConfigurations
+          implicit val formats = DefaultFormats
+          ctx.complete(StatusCodes.OK, Serialization.write(configurations))
+        }
+      }
+    } ~
+      path(IntNumber) { int =>
+        delete {
+          ctx: RequestContext => {
+            val server = servers.get(int.toString).get
+            server.stop()
+            servers.remove(int.toString)
+            db.deleteConfiguration(int.toString)
+            ctx.complete(StatusCodes.NoContent)
           }
         }
       }
-    }
   }
 
 }
