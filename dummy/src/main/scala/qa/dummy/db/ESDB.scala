@@ -2,6 +2,7 @@ package qa.dummy.db
 
 import java.util
 
+import akka.event.slf4j.SLF4JLogging
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.mapping.FieldType.StringType
@@ -22,7 +23,10 @@ import scala.concurrent.{Await, Future}
   * @author Ievgen Medvediev (imedvediev@isightpartners.com)
   * @since 4/10/15
   */
-class ESDB(val elastic_home: String) extends DB {
+class ESDB(val elastic_home: String) extends DB with SLF4JLogging{
+
+  private val maxQuerySize = 1000
+  private var init = false
 
   val settings = ImmutableSettings.settingsBuilder()
     .put("protocol", "http")
@@ -70,17 +74,17 @@ class ESDB(val elastic_home: String) extends DB {
 
   def getAllStartedConfigurations: List[(String, Configuration)] = {
     try {
+      if (!init) Thread.sleep(5000)
       val existsFeature: Future[IndicesExistsResponse] = client.exists("contract")
-      val result: IndicesExistsResponse = Await.result(existsFeature, 5 second)
+      val result: IndicesExistsResponse = Await.result(existsFeature, 20 second)
       if (result.isExists) {
         val execute: Future[SearchResponse] = client.execute {
-          search in "contract" -> "configurations" query {
+          search in "contract" -> "configurations" size maxQuerySize query {
             term("started", true)
           } sort (by field "_id")
         }
-        val searchResult: SearchResponse = Await.result(execute, 5 second)
+        val searchResult: SearchResponse = Await.result(execute, 20 second)
         implicit lazy val formats = org.json4s.DefaultFormats
-        println(searchResult.getHits.getHits)
         searchResult.getHits.getHits.toList.map(p => (p.getId, new Configuration(p.getSource.get("description").toString, parse(p.getSource.get("api").toString).extract[List[Route]])))
       } else {
         client.execute {

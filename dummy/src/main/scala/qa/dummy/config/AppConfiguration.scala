@@ -8,7 +8,7 @@ trait AppConfiguration {
 
   lazy val interface = Try(config.getString("service.interface")).getOrElse("0.0.0.0")
 
-  lazy val port = Try(config.getInt("service.port")).getOrElse(8080)
+  lazy val port = Try(config.getInt("service.port")).getOrElse(8000)
 
 
 }

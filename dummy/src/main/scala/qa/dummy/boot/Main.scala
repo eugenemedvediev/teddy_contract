@@ -28,7 +28,7 @@ object Main extends App with AppConfiguration with SLF4JLogging {
   }
 
   implicit val system = ActorSystem("servers")
-  val restService = system.actorOf(Props(new RestServiceActor(dbP = db, serversP = servers)), "servers")
+  val restService = system.actorOf(Props(new RestServiceActor(db, servers)), "servers")
 
   IO(Http) ! Http.Bind(restService, interface, port)
 }

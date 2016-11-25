@@ -17,12 +17,8 @@ import spray.routing._
 /**
   * Created by ievgen on 11/11/2016.
   */
-class RestServiceActor(dbP: DB, serversP: scala.collection.mutable.Map[String, APIServer]) extends Actor with RestService {
-  val db: DB = dbP
-  val servers: scala.collection.mutable.Map[String, APIServer] = serversP
-
+class RestServiceActor(val db: DB, val servers: scala.collection.mutable.Map[String, APIServer]) extends Actor with RestService {
   implicit def actorRefFactory = context
-
   def receive = runRoute(rest)
 }
 
@@ -33,9 +29,16 @@ trait RestService extends HttpService with SLF4JLogging {
 
   val db: DB
   val servers: scala.collection.mutable.Map[String, APIServer]
-  implicit val executionContext = actorRefFactory.dispatcher
+  private implicit val executionContext = actorRefFactory.dispatcher
+  private val fromPortKey = "FROM_PORT"
+  private val fromPortValue = "9000"
+  private val toPortKey = "TO_PORT"
+  private val toPortValue = "9005"
+  private val fromPort = sys.env.getOrElse(fromPortKey, fromPortValue).toInt
+  private val toPort = sys.env.getOrElse(toPortKey, toPortValue).toInt
+  log.debug(s"Port range: $fromPort-$toPort")
 
-  val rest = respondWithMediaType(MediaTypes.`application/json`) {
+  protected val rest = respondWithMediaType(MediaTypes.`application/json`) {
     path("") {
       post {
         entity(Unmarshaller(MediaTypes.`application/json`) {
@@ -47,29 +50,44 @@ trait RestService extends HttpService with SLF4JLogging {
         }) {
           configuration: Configuration =>
             ctx: RequestContext => {
-              val server = DummyCreator.createServer(8090, configuration)
+              val server = DummyCreator.createServer(fromPort, configuration)
               server.start
-              val port = server.getPort.toString
-              servers.put(port, server)
-              db.writeConfiguration(port, configuration)
-              ctx.complete(StatusCodes.OK, port)
+              val port = server.getPort
+              if (port > toPort) {
+                server.stop()
+                ctx.complete(StatusCodes.BadRequest, s"""{"error": "Port limit reached; $fromPort-$toPort"}""")
+              } else {
+                servers.put(port.toString, server)
+                db.writeConfiguration(port.toString, configuration)
+                ctx.complete(StatusCodes.OK, s"""{"port": $port}""")
+              }
             }
         }
       } ~ get {
         ctx: RequestContext => {
-          val configurations = db.getAllStartedConfigurations
+          val configurations = db.getAllStartedConfigurations.map(x => (x._1.toString, x._2))
           implicit val formats = DefaultFormats
           ctx.complete(StatusCodes.OK, Serialization.write(configurations))
         }
       }
     } ~
-      path(IntNumber) { int =>
+      path(IntNumber) { port =>
         delete {
           ctx: RequestContext => {
-            val server = servers.get(int.toString).get
-            server.stop()
-            servers.remove(int.toString)
-            db.deleteConfiguration(int.toString)
+            try {
+              val server = servers(port.toString)
+              servers.remove(port.toString)
+              server.stop()
+            } catch {
+              case e: Exception => log.error(s"Attempt to delete not existing server: ${e.getMessage}")
+            }
+
+            try {
+              db.deleteConfiguration(port.toString)
+            } catch {
+              case e: Exception => log.error(s"Attempt to delete not existing server from db ${e.getMessage}")
+            }
+
             ctx.complete(StatusCodes.NoContent)
           }
         }
