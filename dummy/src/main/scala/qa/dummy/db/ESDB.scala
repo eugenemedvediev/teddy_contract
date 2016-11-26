@@ -5,7 +5,7 @@ import java.util
 import akka.event.slf4j.SLF4JLogging
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.mapping.FieldType.StringType
+import com.sksamuel.elastic4s.mappings.FieldType.StringType
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.action.search.SearchResponse
@@ -24,14 +24,13 @@ import scala.concurrent.{Await, Future}
   * @since 4/10/15
   */
 class ESDB(val elastic_home: String) extends DB with SLF4JLogging{
-
   private val maxQuerySize = 1000
-  private var init = false
-
   val settings = ImmutableSettings.settingsBuilder()
     .put("protocol", "http")
     .put("path.home", elastic_home).build()
   val client = ElasticClient.local(settings)
+  Thread.sleep(5000)
+
   //  val settings = ImmutableSettings.settingsBuilder().put("cluster.name", "elasticsearch-ievgen").build()
   //  val client = ElasticClient.remote(settings, ("localhost", 9300))
 
@@ -74,18 +73,17 @@ class ESDB(val elastic_home: String) extends DB with SLF4JLogging{
 
   def getAllStartedConfigurations: List[(String, Configuration)] = {
     try {
-      if (!init) Thread.sleep(5000)
-      val existsFeature: Future[IndicesExistsResponse] = client.exists("contract")
+      val existsFeature: Future[IndicesExistsResponse] = client.execute { index exists "contract" }
       val result: IndicesExistsResponse = Await.result(existsFeature, 20 second)
       if (result.isExists) {
         val execute: Future[SearchResponse] = client.execute {
           search in "contract" -> "configurations" size maxQuerySize query {
-            term("started", true)
+            termQuery("started", true)
           } sort (by field "_id")
         }
         val searchResult: SearchResponse = Await.result(execute, 20 second)
         implicit lazy val formats = org.json4s.DefaultFormats
-        searchResult.getHits.getHits.toList.map(p => (p.getId, new Configuration(p.getSource.get("description").toString, parse(p.getSource.get("api").toString).extract[List[Route]])))
+        searchResult.getHits.getHits.toList.map(p => (p.getId, Configuration(p.getSource.get("description").toString, parse(p.getSource.get("api").toString).extract[List[Route]])))
       } else {
         client.execute {
           create index "contract" shards 5 mappings (

@@ -13,7 +13,7 @@ val beeclientit = "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0" % "it"
 val slf4j = "org.slf4j" % "slf4j-api" % "1.7.12"
 val logbackcore = "ch.qos.logback" % "logback-core" % "1.1.3"
 val logbackclassic = "ch.qos.logback" % "logback-classic" % "1.1.3"
-val elasticsearch = "com.sksamuel.elastic4s" %% "elastic4s" % "1.1.2.0"
+val elasticsearch = "com.sksamuel.elastic4s" %% "elastic4s" % "1.5.14"
 
 val itTestFilter: String => Boolean = { name =>
   (name endsWith "ItTest") || (name endsWith "IntegrationTest")
