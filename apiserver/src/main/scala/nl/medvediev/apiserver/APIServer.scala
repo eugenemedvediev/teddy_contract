@@ -63,7 +63,7 @@ class APIServer(initPort: Int, routes: List[APIRoute]) {
     this
   }
 
-  def stop() = {
+  def stop(): Unit = {
     if (socketConnection != null) socketConnection.close()
     port = initPort
   }
