@@ -1,7 +1,7 @@
-package com.isightpartners.qa.teddy.creator
+package nl.medvediev.qa.teddy.creator
 
-import com.isightpartners.qa.teddy.creator.DummyCreator._
-import com.isightpartners.qa.teddy.model.{Scenario, Path}
+import nl.medvediev.qa.teddy.creator.DummyCreator._
+import nl.medvediev.qa.teddy.model.{Scenario, Path}
 import fr.simply.{StaticServerResponse, DynamicServerResponse, ServerRoute, StubServer}
 import org.json4s.JValue
 import org.json4s.jackson.JsonMethods._

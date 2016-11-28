@@ -1,14 +1,14 @@
 /**
- * iSIGHT Partners, Inc. Proprietary
+ * nl.medvediev.qa
  */
 
-package com.isightpartners.qa.teddy.util
+package nl.medvediev.qa.teddy.util
 
 import java.io.{File, InputStream}
 import java.util.Date
 
-import com.isightpartners.qa.teddy.HttpQuery
-import com.isightpartners.qa.teddy.model.{Server => ServerModel, Configuration}
+import nl.medvediev.qa.teddy.HttpQuery
+import nl.medvediev.qa.teddy.model.{Server => ServerModel, Configuration}
 import org.apache.http.client.methods._
 import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.impl.client.HttpClients
@@ -18,7 +18,7 @@ import org.json4s.jackson.Serialization
 
 /**
  *
- * @author Ievgen Medvediev (imedvediev@isightpartners.com)
+ * @author Ievgen Medvediev
  * @since 4/7/15
  */
 object StubLoader extends App {

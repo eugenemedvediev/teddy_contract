@@ -1,12 +1,12 @@
 /**
- * iSIGHT Partners, Inc. Proprietary
+ * nl.medvediev.qa
  */
 
-package com.isightpartners.qa.teddy.db
+package nl.medvediev.qa.teddy.db
 
 import java.util
 
-import com.isightpartners.qa.teddy.model.{Configuration, Path}
+import nl.medvediev.qa.teddy.model.{Configuration, Path}
 //import com.sksamuel.elastic4s.ElasticClient
 //import com.sksamuel.elastic4s.ElasticDsl._
 //import com.sksamuel.elastic4s.mapping.FieldType.StringType
@@ -23,7 +23,7 @@ import scala.concurrent.{Await, Future}
 
 /**
  *
- * @author Ievgen Medvediev (imedvediev@isightpartners.com)
+ * @author Ievgen Medvediev
  * @since 4/10/15
  */
 class ESDB(val elastic_home: String, val indexName: String) extends DB {

@@ -1,14 +1,14 @@
 /**
- * iSIGHT Partners, Inc. Proprietary
+ * nl.medvediev.qa
  */
 
-package com.isightpartners.qa.teddy.db
+package nl.medvediev.qa.teddy.db
 
-import com.isightpartners.qa.teddy.model.Configuration
+import nl.medvediev.qa.teddy.model.Configuration
 
 /**
  *
- * @author Ievgen Medvediev (imedvediev@isightpartners.com)
+ * @author Ievgen Medvediev
  * @since 4/13/15
  */
 trait DB {

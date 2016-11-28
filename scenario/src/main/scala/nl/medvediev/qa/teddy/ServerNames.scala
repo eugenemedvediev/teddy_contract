@@ -1,12 +1,12 @@
 /**
- * iSIGHT Partners, Inc. Proprietary
+ * nl.medvediev.qa
  */
 
-package com.isightpartners.qa.teddy
+package nl.medvediev.qa.teddy
 
 /**
  *
- * @author Ievgen Medvediev (imedvediev@isightpartners.com)
+ * @author Ievgen Medvediev
  * @since 4/8/15
  */
 trait ServerNames {

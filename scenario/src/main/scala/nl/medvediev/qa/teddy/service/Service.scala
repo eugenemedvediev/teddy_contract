@@ -1,6 +1,6 @@
-package com.isightpartners.qa.teddy.service
+package nl.medvediev.qa.teddy.service
 
-import com.isightpartners.qa.teddy.model.Configuration
+import nl.medvediev.qa.teddy.model.Configuration
 import fr.simply.StubServer
 import org.json4s.JsonAST.JValue
 

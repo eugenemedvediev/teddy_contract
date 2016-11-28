@@ -1,12 +1,12 @@
 /**
- * iSIGHT Partners, Inc. Proprietary
+ * nl.medvediev.qa
  */
 
 package qa.common.model
 
 /**
  *
- * @author Ievgen Medvediev (imedvediev@isightpartners.com)
+ * @author Ievgen Medvediev
  * @since 4/3/15
  */
 case class Configuration(description: String = "", api: List[Route] = List[Route]())

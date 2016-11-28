@@ -20,7 +20,7 @@ import scala.concurrent.{Await, Future}
 
 /**
   *
-  * @author Ievgen Medvediev (imedvediev@isightpartners.com)
+  * @author Ievgen Medvediev
   * @since 4/10/15
   */
 class ESDB(val elastic_home: String) extends DB with SLF4JLogging{

@@ -1,8 +1,8 @@
-package com.isightpartners.qa.teddy.creator
+package nl.medvediev.qa.teddy.creator
 
 import com.github.kxbmap.configs._
-import com.isightpartners.qa.teddy.creator.DummyCreator._
-import com.isightpartners.qa.teddy.model.{Scenario, Path}
+import nl.medvediev.qa.teddy.creator.DummyCreator._
+import nl.medvediev.qa.teddy.model.{Scenario, Path}
 import com.typesafe.config.ConfigFactory
 import fr.simply._
 import fr.simply.util.ContentType

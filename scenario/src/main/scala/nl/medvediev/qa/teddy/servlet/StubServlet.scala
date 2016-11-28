@@ -1,11 +1,11 @@
-package com.isightpartners.qa.teddy.servlet
+package nl.medvediev.qa.teddy.servlet
 
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
-import com.isightpartners.qa.teddy.creator.{Creator, DummyCreator}
-import com.isightpartners.qa.teddy.db.DB
-import com.isightpartners.qa.teddy.service.{StubService, Service}
-import com.isightpartners.qa.teddy.model.Configuration
+import nl.medvediev.qa.teddy.creator.{Creator, DummyCreator}
+import nl.medvediev.qa.teddy.db.DB
+import nl.medvediev.qa.teddy.service.{StubService, Service}
+import nl.medvediev.qa.teddy.model.Configuration
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._

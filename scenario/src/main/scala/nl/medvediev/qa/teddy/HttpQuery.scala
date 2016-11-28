@@ -1,12 +1,12 @@
 /**
- * iSIGHT Partners, Inc. Proprietary
+ * nl.medvediev.qa
  */
 
-package com.isightpartners.qa.teddy
+package nl.medvediev.qa.teddy
 
 import java.io.InputStream
 
-import com.isightpartners.qa.teddy.model.{Path, Server}
+import nl.medvediev.qa.teddy.model.{Path, Server}
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet, HttpPost, HttpRequestBase}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
@@ -15,7 +15,7 @@ import org.json4s.jackson.JsonMethods._
 
 /**
  *
- * @author Ievgen Medvediev (imedvediev@isightpartners.com)
+ * @author Ievgen Medvediev
  * @since 3/31/15
  */
 trait HttpQuery {

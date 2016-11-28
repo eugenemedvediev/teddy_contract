@@ -1,8 +1,8 @@
 /**
- * iSIGHT Partners, Inc. Proprietary
+ * nl.medvediev.qa
  */
 
-package com.isightpartners.qa.teddy.servlet
+package nl.medvediev.qa.teddy.servlet
 
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
@@ -11,7 +11,7 @@ import org.json4s.jackson.JsonMethods._
 
 /**
  *
- * @author Ievgen Medvediev (imedvediev@isightpartners.com)
+ * @author Ievgen Medvediev
  * @since 4/4/15
  */
 class HowtoServlet extends HttpServlet {

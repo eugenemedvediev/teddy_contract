@@ -5,7 +5,7 @@ import qa.common.model.Configuration
 
 /**
   *
-  * @author Ievgen Medvediev (imedvediev@isightpartners.com)
+  * @author Ievgen Medvediev
   * @since 4/13/15
   */
 trait DB {

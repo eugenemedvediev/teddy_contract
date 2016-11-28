@@ -1,16 +1,16 @@
 /**
- * iSIGHT Partners, Inc. Proprietary
+ * nl.medvediev.qa
  */
 
-package com.isightpartners.qa.teddy.util
+package nl.medvediev.qa.teddy.util
 
-import com.isightpartners.qa.teddy.model.Configuration
+import nl.medvediev.qa.teddy.model.Configuration
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
 /**
  *
- * @author Ievgen Medvediev (imedvediev@isightpartners.com)
+ * @author Ievgen Medvediev
  * @since 4/17/15
  */
 object Content extends App {

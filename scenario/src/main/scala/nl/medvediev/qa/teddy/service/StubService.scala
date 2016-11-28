@@ -1,9 +1,9 @@
-package com.isightpartners.qa.teddy.service
+package nl.medvediev.qa.teddy.service
 
-import com.isightpartners.qa.teddy._
-import com.isightpartners.qa.teddy.creator.Creator
-import com.isightpartners.qa.teddy.db.DB
-import com.isightpartners.qa.teddy.model.Configuration
+import nl.medvediev.qa.teddy._
+import nl.medvediev.qa.teddy.creator.Creator
+import nl.medvediev.qa.teddy.db.DB
+import nl.medvediev.qa.teddy.model.Configuration
 import fr.simply.StubServer
 import org.json4s.Extraction
 import org.json4s.JsonAST.JValue

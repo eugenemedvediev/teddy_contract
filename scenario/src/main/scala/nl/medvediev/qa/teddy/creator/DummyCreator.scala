@@ -1,10 +1,10 @@
 /**
- * iSIGHT Partners, Inc. Proprietary
+ * nl.medvediev.qa
  */
 
-package com.isightpartners.qa.teddy.creator
+package nl.medvediev.qa.teddy.creator
 
-import com.isightpartners.qa.teddy.model.{ScenarioResponse, Path, Scenario}
+import nl.medvediev.qa.teddy.model.{ScenarioResponse, Path, Scenario}
 import fr.simply._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
@@ -12,7 +12,7 @@ import org.json4s.jackson.Serialization
 
 /**
  *
- * @author Ievgen Medvediev (imedvediev@isightpartners.com)
+ * @author Ievgen Medvediev
  * @since 4/3/15
  */
 object DummyCreator extends Creator {
