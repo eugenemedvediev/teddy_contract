@@ -10,6 +10,8 @@ import org.json4s.jackson.Serialization
 import qa.common.model.Configuration
 import qa.dummy.DummyCreator
 import qa.dummy.db.DB
+import spray.http.ContentTypes._
+import spray.http.HttpHeaders._
 import spray.http._
 import spray.httpx.unmarshalling._
 import spray.routing._
@@ -36,10 +38,45 @@ trait RestService extends HttpService with SLF4JLogging {
   private val toPortValue = "9005"
   private val fromPort = sys.env.getOrElse(fromPortKey, fromPortValue).toInt
   private val toPort = sys.env.getOrElse(toPortKey, toPortValue).toInt
-  log.debug(s"Port range: $fromPort-$toPort")
+  val contracts = "contracts"
 
   protected val rest = respondWithMediaType(MediaTypes.`application/json`) {
     path("") {
+      respondWithHeader(`Content-Type`(`application/json`)) {
+        complete(
+          StatusCodes.OK,
+          """
+            |<!DOCTYPE html>
+            |<html>
+            | <head>
+            |   <title>Contract Servers</title>
+            | </head>
+            | <body>
+            |   <h1>%s</h1>
+            |   <h3>API:<h3>
+            |   <ul>
+            |     <li>
+            |       path: /contracts
+            |       method: GET
+            |       description: Get all contracts
+            |     </li>
+            |<li>
+            |path: /contracts/{port}
+            |method: DELETE
+            |description: Delete specified contract
+            |</li>
+            |<li></li>
+            |</ul>
+            |<h3>Configuration:</h3>
+            |<pre><code>%s</code></pre>
+            |
+            |</body>
+            |</html>
+          """.stripMargin
+        )
+      }
+    } ~
+      path(contracts) {
       post {
         entity(Unmarshaller(MediaTypes.`application/json`) {
           case httpEntity: HttpEntity => {
@@ -71,7 +108,7 @@ trait RestService extends HttpService with SLF4JLogging {
         }
       }
     } ~
-      path(IntNumber) { port =>
+      path(contracts / IntNumber) { port =>
         delete {
           ctx: RequestContext => {
             try {
