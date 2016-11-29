@@ -227,6 +227,7 @@ class DummyCreatorIntegrationTest extends FunSuite {
     assert((parse(response.body.asString) \\ "error").extract[String] == "Authorization header is missing")
   }
 
+  private val CONTRACT_CONFIGURATION = "_contract_"
   test("configuration route json") {
     // given
     implicit lazy val formats = org.json4s.DefaultFormats
@@ -258,7 +259,7 @@ class DummyCreatorIntegrationTest extends FunSuite {
     val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, Configuration("any", api))
     workingServer.start
     val port = workingServer.getPort
-    val url = s"http://localhost:$port/_dummy_"
+    val url = s"http://localhost:$port/$CONTRACT_CONFIGURATION"
     val httpClient = new HttpClient
 
     // when
@@ -338,7 +339,7 @@ class DummyCreatorIntegrationTest extends FunSuite {
     val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, Configuration("any", api))
     workingServer.start
     val port = workingServer.getPort
-    val url = s"http://localhost:$port/_dummy_"
+    val url = s"http://localhost:$port/$CONTRACT_CONFIGURATION"
     val httpClient = new HttpClient
 
 
@@ -425,7 +426,7 @@ class DummyCreatorIntegrationTest extends FunSuite {
     val workingServer: APIServer = DummyCreator.createServer(DEFAULT_PORT, Configuration("any", api))
     workingServer.start
     val port = workingServer.getPort
-    val url = s"http://localhost:$port/_dummy_"
+    val url = s"http://localhost:$port/$CONTRACT_CONFIGURATION"
     val httpClient = new HttpClient
 
 
@@ -754,7 +755,8 @@ class DummyCreatorIntegrationTest extends FunSuite {
 
     // then
     assert(response.status.code == 503)
-    assert((parse(response.body.asString) \\ "internal_dummy_error").extract[String] == "Can't load body from file: /tmp/not_existing_file")
+    val internalContractError = "internal" + CONTRACT_CONFIGURATION + "error"
+    assert((parse(response.body.asString) \\ internalContractError).extract[String] == "Can't load body from file: /tmp/not_existing_file")
   }
 
   test("correct required header without value") {

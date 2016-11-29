@@ -25,7 +25,7 @@ object DummyServer {
 
       println(s"Server:\n\thttp://localhost:$port")
       printConfigurationResources(configuration)
-      println(s"Full configuration:\n\tcurl -XGET http://localhost:$port${DummyCreator.DUMMY_CONFIGURATION}")
+      println(s"Full configuration:\n\tcurl -XGET http://localhost:$port${DummyCreator.CONTRACT_CONFIGURATION}")
     } catch {
       case ex: ConfigurationException =>
         println(s"Configuration Error: ${ex.getMessage}")

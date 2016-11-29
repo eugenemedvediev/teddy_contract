@@ -26,7 +26,7 @@ trait Creator {
     index = 0
   }
 
-  val DUMMY_CONFIGURATION = "/_dummy_/configuration"
+  val DUMMY_CONFIGURATION = "/_contract_/configuration"
 
   val DEFAULT_WORKING_SERVER_DESCRIPTION = "working server"
 

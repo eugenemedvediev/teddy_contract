@@ -20,7 +20,7 @@ import scala.collection.JavaConversions._
 
 object DummyCreator {
 
-  val DUMMY_CONFIGURATION = "/_dummy_"
+  val CONTRACT_CONFIGURATION = "/_contract_"
   val ACCEPT_HEADER = "Accept"
   val CONTENT_TYPE_HEADER = "Content-Type"
   val APPLICATION_JSON = "application/json"
@@ -85,7 +85,7 @@ object DummyCreator {
     }
 
     GET(
-      path = DUMMY_CONFIGURATION,
+      path = CONTRACT_CONFIGURATION,
       params = Map(),
       response = DynamicAPIResponse({
         (request, patterns) =>
@@ -171,7 +171,7 @@ object DummyCreator {
             case ex: ContractException =>
               SimpleAPIResponse(503, APPLICATION_JSON, ContractError.CONTRACT_ERROR.format(ex.getMessage))
             case t: Throwable =>
-              SimpleAPIResponse(503, APPLICATION_JSON, ContractError.DUMMY_ERROR.format(t.getMessage))
+              SimpleAPIResponse(503, APPLICATION_JSON, ContractError.INTERNAL_CONTRACT_ERROR.format(t.getMessage))
           }
       })
     )
