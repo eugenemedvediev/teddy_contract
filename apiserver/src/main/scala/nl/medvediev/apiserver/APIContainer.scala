@@ -48,7 +48,7 @@ class APIContainer(defaultResponse: SimpleAPIResponse, routes: List[APIRoute]) e
     if (request.getMethod.equalsIgnoreCase(apiRoute.verb.toString) && testParams(request, apiRoute.params))
       PathMatcher().matches(request.getPath.getPath, apiRoute.path)
     else
-      PathMatcher().MatcherResult(false)
+      PathMatcher().MatcherResult(isMatch = false)
   }
 
   private def makeResponse(response: Response, simpleAPIResponse: SimpleAPIResponse) {

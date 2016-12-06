@@ -121,6 +121,142 @@ class APIServerTest extends FunSuite {
     }
   }
 
+  test("put") {
+    // given
+    val apiRoutes: List[APIRoute] = List(
+      PUT(
+        path = "/",
+        params = Map(),
+        response = SimpleAPIResponse(
+          code = Status.OK.getCode,
+          contentType = "application/json",
+          body = """{"test": "static"}""",
+          headers = Map()
+        )
+      )
+    )
+    val server: APIServer = new APIServer(9090, apiRoutes)
+    server.start
+    val wsClient = NingWSClient()
+
+    // when
+    val result = wsClient
+      .url(s"http://localhost:${server.getPort}")
+      .put("test")
+
+    // then
+    ScalaFutures.whenReady(result) {
+      response => {
+        server.stop()
+        assert(response.status === 200)
+        assert(response.header("Content-Type").get === "application/json")
+        assert(response.body === """{"test": "static"}""")
+      }
+    }
+  }
+
+  test("patch") {
+    // given
+    val apiRoutes: List[APIRoute] = List(
+      PATCH(
+        path = "/",
+        params = Map(),
+        response = SimpleAPIResponse(
+          code = Status.OK.getCode,
+          contentType = "application/json",
+          body = """{"test": "static"}""",
+          headers = Map()
+        )
+      )
+    )
+    val server: APIServer = new APIServer(9090, apiRoutes)
+    server.start
+    val wsClient = NingWSClient()
+
+    // when
+    val result = wsClient
+      .url(s"http://localhost:${server.getPort}")
+      .patch("test")
+
+    // then
+    ScalaFutures.whenReady(result) {
+      response => {
+        server.stop()
+        assert(response.status === 200)
+        assert(response.header("Content-Type").get === "application/json")
+        assert(response.body === """{"test": "static"}""")
+      }
+    }
+  }
+
+  test("options") {
+    // given
+    val apiRoutes: List[APIRoute] = List(
+      OPTIONS(
+        path = "/",
+        params = Map(),
+        response = SimpleAPIResponse(
+          code = Status.OK.getCode,
+          contentType = "application/json",
+          body = """{"test": "static"}""",
+          headers = Map()
+        )
+      )
+    )
+    val server: APIServer = new APIServer(9090, apiRoutes)
+    server.start
+    val wsClient = NingWSClient()
+
+    // when
+    val result = wsClient
+      .url(s"http://localhost:${server.getPort}")
+      .options()
+
+    // then
+    ScalaFutures.whenReady(result) {
+      response => {
+        server.stop()
+        assert(response.status === 200)
+        assert(response.header("Content-Type").get === "application/json")
+        assert(response.body === """{"test": "static"}""")
+      }
+    }
+  }
+
+  test("delete") {
+    // given
+    val apiRoutes: List[APIRoute] = List(
+      DELETE(
+        path = "/",
+        params = Map(),
+        response = SimpleAPIResponse(
+          code = Status.NO_CONTENT.getCode,
+          contentType = "application/json",
+          body = """{"test": "static"}""",
+          headers = Map()
+        )
+      )
+    )
+    val server: APIServer = new APIServer(9090, apiRoutes)
+    server.start
+    val wsClient = NingWSClient()
+
+    // when
+    val result = wsClient
+      .url(s"http://localhost:${server.getPort}")
+      .delete()
+
+    // then
+    ScalaFutures.whenReady(result) {
+      response => {
+        server.stop()
+        assert(response.status === 204)
+        assert(response.header("Content-Type").get === "application/json")
+        assert(response.body === "")
+      }
+    }
+  }
+
   test("reuse port") {
     // given
     val server1 = new APIServer(9090, List())

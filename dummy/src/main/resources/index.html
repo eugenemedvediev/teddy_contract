@@ -1,19 +1,22 @@
 <html>
 <head>
-    <title>Contract Servers</title>
+    <title>Contracts</title>
 </head>
 <body>
 <h3>API:</h3>
 <ul>
-    <li>path: /contracts method: GET description: Get all contracts</li>
-    <li>path: /contracts/
-        {{port}}
-        method: DELETE description: Delete specified contract</li>
-    <li></li>
+    <li>path: <a href="./contracts">/contracts</a><br/>
+        method: <b>GET</b><br/>
+        description: Get all contracts<br/>
+    </li>
+    <li>path: <a href="./contracts">/contracts</a><br/>
+        method: <b>POST</b><br/>
+        description: Post new contract<br/>
+    </li>
+    <li>path: <a href="./contracts/{port}">/contracts/{port}</a><br/>
+        method: <b>DELETE</b><br/>
+        description: Delete specified contract<br/>
+    </li>
 </ul>
-<h3>Configuration:</h3>
-<pre>
-                <code>%s</code>
-              </pre>
 </body>
 </html>
