@@ -95,6 +95,13 @@ trait RestService extends HttpService with SLF4JLogging {
 
                 ctx.complete(StatusCodes.NoContent)
               }
+            } ~
+            get {
+              ctx: RequestContext => {
+                val configuration = db.readConfiguration(port.toString)
+                implicit val formats = DefaultFormats
+                ctx.complete(StatusCodes.OK, Serialization.write(configuration))
+              }
             }
           }
       }

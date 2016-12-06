@@ -54,7 +54,6 @@ class ESDB(val elastic_home: String) extends DB with SLF4JLogging{
   }
 
   def readConfiguration(name: String): Configuration = {
-    //TODO: not used anymore
     implicit val formats = DefaultFormats
     val execute: Future[GetResponse] = client.execute {
       get id name from "contract/configurations"
@@ -62,7 +61,7 @@ class ESDB(val elastic_home: String) extends DB with SLF4JLogging{
     val source: util.Map[String, AnyRef] = Await.result(execute, 120 seconds).getSource
     val description: String = source.get("description").toString
     val api: String = source.get("api").toString
-    new Configuration(description, parse(api).extract[List[Route]])
+    Configuration(description, parse(api).extract[List[Route]])
   }
 
   def deleteConfiguration(name: String) = {
