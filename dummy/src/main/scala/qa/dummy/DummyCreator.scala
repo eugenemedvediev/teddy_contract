@@ -59,7 +59,7 @@ object DummyCreator {
           |<!DOCTYPE html>
           |<html>
           |<head>
-          |<title>Dummy Server</title>
+          |<title>Contract Server</title>
           |</head>
           |<body>
           |<h1>%s</h1>
