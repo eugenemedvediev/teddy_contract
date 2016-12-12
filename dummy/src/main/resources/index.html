@@ -63,5 +63,60 @@
     </code>
 </pre>
 
+<h2>Advanced ;)</h2>
+<pre class="prettyprint">
+    <code>curl -X POST http://localhost:8000/contracts -H "Content-Type: application/json" --data '
+        {
+          "description": "Test API Server with patterns",
+          "api": [
+            {
+              "method": "GET",
+              "path": "/test/*/**/?/*/?/**/",
+              "scenarios": [
+                {
+                  "name": "successful scenario",
+                  "response": {
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "body": {
+                      "embedded_fields" : {
+                        "star": "${*0}",
+                        "doublestar": "${*1}",
+                        "question": "${*2}",
+                        "star2": "${*3}",
+                        "question2": "${*4}",
+                        "doublestar2": "${*5}"
+                      }
+                    },
+                    "code": 200
+                  }
+                }
+              ]
+            }
+          ]
+        }
+        '
+    </code>
+</pre>
+
+<h3>Check advanced api-contract response:</h3>
+<code>$ curl -X GET http://localhost:9000/test/<span style="color:red;font-weight: bold;" title="star 1">star_in_one_section</span>/<span style="color:blue;font-weight: bold;" title="doublestar 1">double/star/in/multi/sections</span>/<span style="color:green;font-weight: bold;" title="question mark 1">1</span>/<span style="color:red;font-weight: bold;" title="star 2">star2_in_one_section</span>/<span style="color:green;font-weight: bold;" title="question mark 1">2</span>/<span style="color:blue;font-weight: bold;" title="doublestar 2">double/star/in/multi/sections/two/</span> | python -m json.tool</code>
+
+<pre class="prettyprint">
+    <code>
+        {
+            "embedded_fields": {
+                "doublestar": "double/star/in/multi/sections",
+                "doublestar2": "double/star/in/multi/sections/two",
+                "question": "1",
+                "question2": "2",
+                "star": "star_in_one_section",
+                "star2": "star2_in_one_section"
+            }
+        }
+    </code>
+</pre>
+
 </body>
 </html>
