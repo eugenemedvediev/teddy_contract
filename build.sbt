@@ -103,8 +103,7 @@ lazy val dummy = (project in file("dummy")).
     Revolver.settings,
     mainClass in Compile := Some("qa.dummy.boot.Main"),
     packageName in Docker := packageName.value,
-    dockerRepository := Some("imedvediev"),
-    dockerExposedPorts := Seq(8080)
+    dockerRepository := Some("imedvediev")
   ).
   configs(IntegrationTest).
   dependsOn(common, http)
