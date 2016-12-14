@@ -31,7 +31,7 @@ object DummyCreator {
   @throws(classOf[ConfigurationException])
   def createServer(port: Int, configuration: Configuration) = {
     configuration.api.foreach(validateRoute)
-    val routes: List[APIRoute] = createConfigurationRoute(configuration) :: createAPIRoutes(configuration.api)
+    val routes: List[APIRoute] = createConfigurationRoute(port, configuration) :: createAPIRoutes(configuration.api)
     new APIServer(port, routes).defaultResponse(503, APPLICATION_JSON, ContractError.NOT_SUPPORTED_PATH_ERROR)
   }
 
@@ -48,29 +48,33 @@ object DummyCreator {
     }
   }
 
-  def createConfigurationRoute(configuration: Configuration): APIRoute = {
+  def createConfigurationRoute(port: Int, configuration: Configuration): APIRoute = {
 
-    def generateConfigurationHtmlContent(configuration: Configuration): String = {
+    def generateConfigurationHtmlContent(port: Int, configuration: Configuration): String = {
       implicit val formats = DefaultFormats
       val list = Util.getStringifiedRoutes(configuration)
+      val curl = Util.getCurlRoutes(port, configuration)
       val htmlList = list.foldLeft[String]("")((string, elem) => s"$string\n<li>$elem</li>")
+      val htmlCurl = curl.foldLeft[String]("")((string, elem) => s"$string\n<li><b>${elem._1}</b><pre><code>${elem._2}</code></pre></li>")
       val html: String =
         """
           |<!DOCTYPE html>
           |<html>
           |<head>
-          |<title>Contract Server</title>
+          |<title>API Contract Server</title>
           |</head>
           |<body>
           |<h1>%s</h1>
           |<h3>Routes:<h3>
           |<ul>%s</ul>
-          |<h3>Configuration:</h3>
+          |<h3>Curl:</h3>
+          |<ul>%s</ul>
+          |<h3>Contract:</h3>
           |<pre><code>%s</code></pre>
           |
           |</body>
           |</html>
-        """.format(configuration.description, htmlList, pretty(parse(Serialization.write(configuration.api)))).stripMargin
+        """.format(configuration.description, htmlList, htmlCurl, pretty(parse(Serialization.write(configuration)))).stripMargin
       html
     }
 
@@ -96,7 +100,7 @@ object DummyCreator {
                 case value if value.contains(APPLICATION_JSON) =>
                   SimpleAPIResponse(200, APPLICATION_JSON, generateConfigurationJsonContent(configuration))
                 case value if value.contains(TEXT_HTML) =>
-                  SimpleAPIResponse(200, TEXT_HTML, generateConfigurationHtmlContent(configuration))
+                  SimpleAPIResponse(200, TEXT_HTML, generateConfigurationHtmlContent(port, configuration))
                 case _ => textPlainResponse
               }
             }
