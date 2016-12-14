@@ -13,8 +13,8 @@ if [ -z "$2" ];
     toPort=${ports[1]};
 fi
 
-dockerCmdD="docker run -d -p ${servicePort}:8000 --expose=$fromPort-$toPort -p $fromPort-$toPort:$fromPort-$toPort -e \"FROM_PORT=${fromPort}\" -e \"TO_PORT=${toPort}\" imedvediev/api-contract:0.0.1"
-dockerCmdF="docker run -it -p ${servicePort}:8000 --expose=$fromPort-$toPort -p $fromPort-$toPort:$fromPort-$toPort -e \"FROM_PORT=${fromPort}\" -e \"TO_PORT=${toPort}\" imedvediev/api-contract:0.0.1"
+dockerCmdD="docker run -d -p ${servicePort}:8000 --expose=$fromPort-$toPort -p $fromPort-$toPort:$fromPort-$toPort -e \"FROM_PORT=${fromPort}\" -e \"TO_PORT=${toPort}\" imedvediev/api-contract:0.0.2"
+dockerCmdF="docker run -it -p ${servicePort}:8000 --expose=$fromPort-$toPort -p $fromPort-$toPort:$fromPort-$toPort -e \"FROM_PORT=${fromPort}\" -e \"TO_PORT=${toPort}\" imedvediev/api-contract:0.0.2"
 echo "Execute: $dockerCmdD"
 select x in "Background" "Foreground" "Cancel"; do
     case $x in

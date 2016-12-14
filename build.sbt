@@ -78,7 +78,7 @@ lazy val dummy = (project in file("dummy")).
   enablePlugins(JavaAppPackaging).
   settings(
     name := "api-contract",
-    version := "0.0.1",
+    version := "0.0.2",
     libraryDependencies ++= Seq(
       elasticsearch,
       "uk.co.bigbeeconsultants" %% "bee-client" % "0.28.0" % "it" excludeAll(ExclusionRule(organization = "org.scalatest"), ExclusionRule(organization = "javax.boot")),
